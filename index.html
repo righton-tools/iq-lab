@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3a4dd6">
+<meta name="description" content="研究や実際の知能検査の形式をもとにした本格IQテスト。1問だけの一発チャレンジも。">
+<meta property="og:title" content="IQ Lab｜本格IQテスト">
+<meta property="og:description" content="解けたらIQ◯◯。1問だけの一発チャレンジから45分の本格テストまで。">
+<meta property="og:image" content="https://righton-tools.github.io/iq-lab/icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="IQ Lab">
+<script>window.APP_URL='https://righton-tools.github.io/iq-lab/';window.API_URL='https://script.google.com/macros/s/AKfycbwj2oCV6Y1NkGhg8lHP5K_PTH8F_BBsoBMN5vEtJIfBUFm5S-89Ec4wIAHPMJ9Xxll7/exec';</script>
+</head>
+<body>
+<title>IQ Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Chivo+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one centered column (max 760px); the test screen widens to sidebar + question on desktop, one card at a time on phones. */
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --surface-2:#e8ecf3; --ink:#141a26; --ink-2:#5b6577; --line:#d2d8e3;
+  --accent:#3a4dd6; --accent-ink:#ffffff; --accent-soft:#e3e7fb; --glow:#c7891a; --ok:#1d8f5a; --bad:#cf3f3f;
+  --font-body:'Zen Kaku Gothic New','Hiragino Sans','Noto Sans JP',system-ui,sans-serif;
+  --font-mono:'Chivo Mono','SFMono-Regular',Consolas,monospace;
+  --radius:14px; --shadow:0 4px 18px rgba(20,26,38,.07);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f131b;--surface:#171c27;--surface-2:#202736;--ink:#e9edf5;--ink-2:#99a3b5;--line:#2a3344;--accent:#8292ff;--accent-ink:#0f131b;--accent-soft:#262d4d;--glow:#e6a93c;--ok:#3fbf85;--bad:#ef6464;--shadow:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f131b;--surface:#171c27;--surface-2:#202736;--ink:#e9edf5;--ink-2:#99a3b5;--line:#2a3344;--accent:#8292ff;--accent-ink:#0f131b;--accent-soft:#262d4d;--glow:#e6a93c;--ok:#3fbf85;--bad:#ef6464;--shadow:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100%}
+button{font-family:inherit}
+.wrap{max-width:760px;margin:0 auto;padding-block:14px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body.wide .wrap{max-width:1040px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:4px 14px}
+.logo{font-family:var(--font-mono);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+h1{font-size:30px;line-height:1.25;margin:6px 0 8px;font-weight:900;text-wrap:balance}
+h2{font-size:22px;margin:0 0 8px;font-weight:900;text-wrap:balance}
+h3{font-size:16px;margin:0 0 10px;font-weight:700}
+p{margin:0 0 10px}
+.lead{color:var(--ink-2);font-size:15px;margin:0 0 20px;max-width:60ch}
+.note{color:var(--ink-2);font-size:12.5px;margin-top:12px}
+.center{text-align:center}
+.muted{color:var(--ink-2)}
+.modes{display:grid;gap:12px;margin:0 0 22px}
+@media(min-width:680px){.modes{grid-template-columns:repeat(3,1fr)}}
+.mode{display:block;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--radius);padding:16px 16px 18px;cursor:pointer;color:inherit;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.mode:hover,.mode:focus-visible{transform:translateY(-2px);border-color:var(--accent);outline:none}
+.mtag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--accent);color:var(--accent-ink);margin-bottom:10px;letter-spacing:.04em}
+.mtag.alt{background:var(--ok);color:#fff}
+.mtag.alt2{background:var(--glow);color:#fff}
+.mtitle{font-size:19px;font-weight:900}
+.mdesc{color:var(--ink-2);font-size:13px;margin-top:4px;line-height:1.5}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:14px;min-width:0}
+.btn{font-weight:700;border:none;border-radius:12px;padding:13px 22px;cursor:pointer;background:var(--accent);color:var(--accent-ink);font-size:16px;line-height:1.2}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sec{background:var(--surface-2);color:var(--ink)}
+.btn:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+.ghost{background:none;border:1px solid var(--line);color:var(--ink-2);border-radius:999px;padding:6px 13px;cursor:pointer;font-size:13px}
+.bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.bar.big{height:12px;flex:1}
+.thead{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-2);margin-bottom:8px}
+.timer{font-family:var(--font-mono);font-weight:700;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.tlay{display:grid;gap:16px;margin-top:14px}
+.side{display:none}
+@media(min-width:960px){.tlay{grid-template-columns:240px minmax(0,1fr);align-items:start}.side{display:block;position:sticky;top:16px}}
+.sidet{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.06em;margin-bottom:8px}
+.srow2{display:flex;justify-content:space-between;font-size:14px;padding:6px 8px;border-radius:8px;font-variant-numeric:tabular-nums}
+.srow2.cur{background:var(--accent-soft);font-weight:700}
+.hint{font-size:12px;color:var(--ink-2);margin-top:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:10px}
+.dom{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:3px 10px;border-radius:999px;margin-bottom:10px}
+.lvl{display:inline-block;margin-left:8px;font-size:12px;font-weight:700;color:var(--glow)}
+.qtext{font-size:17px;font-weight:500;margin:0 0 16px;white-space:pre-line}
+.qtext.small{font-size:15px}
+.seqbox{font-family:var(--font-mono);font-size:26px;font-weight:700;text-align:center;letter-spacing:.06em;background:var(--surface-2);border-radius:12px;padding:14px 10px;margin:0 0 18px;word-break:break-word;font-variant-numeric:tabular-nums}
+.cards{display:flex;gap:10px;justify-content:center;margin:0 0 18px;flex-wrap:wrap}
+.pcard{width:64px;height:88px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:26px;font-weight:700;background:var(--surface)}
+.pcard.red{background:#d64545;color:#fff;border-color:#b53535}
+.pcard.brown{background:#8b5a2b;color:#fff;border-color:#6e4521}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:330px;margin:0 auto 18px}
+.cell{width:100%;max-width:100%;aspect-ratio:1;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);display:block}
+.cell.q{background:var(--surface-2)}
+.srow{display:flex;align-items:center;gap:4px;justify-content:center;margin:0 auto 18px;flex-wrap:wrap}
+.srow .cell{width:62px;flex:none}
+.arr{color:var(--ink-2);font-weight:700}
+.single{max-width:150px;margin:0 auto 18px}
+.single.big{max-width:230px}
+.blocks{width:100%;display:block;color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:540px;margin:0 auto}
+@media(min-width:560px){.opts{grid-template-columns:repeat(4,1fr)}}
+.foldrow .cell{width:80px}
+.topts{display:grid;gap:10px}
+.opt{position:relative;border:2px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;padding:8px;color:inherit;text-align:left;font-size:16px;line-height:1.5;min-width:0}
+.opt.v{padding:14px 6px 6px}
+.opt .cell{border:none}
+.topts .opt{padding:12px 14px 12px 42px}
+.opt.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.opt:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+.opt .k{position:absolute;top:7px;left:10px;font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ink-2)}
+.bands{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 18px}
+@media(min-width:560px){.bands{grid-template-columns:repeat(5,1fr)}}
+.opt.band{text-align:center;padding:12px 6px;font-weight:700;font-size:14px}
+.nav{display:flex;gap:10px;justify-content:space-between;margin-top:18px;flex-wrap:wrap}
+.intro h2{margin-top:6px}
+.digit{font-family:var(--font-mono);font-size:96px;font-weight:700;text-align:center;height:150px;line-height:150px;color:var(--accent)}
+.spanin{width:100%;font-size:28px;font-family:var(--font-mono);letter-spacing:.2em;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);text-align:center}
+.spanin:focus{outline:none;border-color:var(--accent)}
+.rcard{text-align:center;padding:26px 18px}
+.rlabel{font-size:13px;color:var(--ink-2);font-weight:700;letter-spacing:.05em}
+.iq{font-family:var(--font-mono);font-size:84px;font-weight:700;line-height:1.05;color:var(--accent);font-variant-numeric:tabular-nums}
+.ci{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.cls{font-size:22px;font-weight:900;margin-top:10px}
+.pct{color:var(--glow);font-weight:700;margin-top:2px}
+.meta{font-size:13px;color:var(--ink-2);margin-top:10px;font-variant-numeric:tabular-nums}
+.grid2{display:grid;gap:14px}
+@media(min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.irow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.iname{width:84px;font-size:13px;font-weight:700;flex:none}
+.inum{font-family:var(--font-mono);width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.radar{width:100%;max-width:300px;display:block;margin:0 auto;color:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl th{font-size:12px;color:var(--ink-2)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 6px}
+.hrow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px;font-variant-numeric:tabular-nums}
+.hrow:last-child{border-bottom:none}
+.rv{border-left:5px solid var(--bad)}
+.rv.ok{border-left-color:var(--ok)}
+.rvh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.mark{font-weight:900}
+.rv.ok .mark{color:var(--ok)}
+.rv.ng .mark{color:var(--bad)}
+.lvl2{font-size:12px;color:var(--ink-2);margin-left:auto}
+.ans{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0}
+.ans .cell{width:76px}
+.al{font-size:12px;color:var(--ink-2);font-weight:700;margin-bottom:4px}
+.exp{font-size:14px;color:var(--ink-2);margin:6px 0 0;border-top:1px dashed var(--line);padding-top:8px}
+.verdict{font-size:40px;font-weight:900;text-align:center;margin:4px 0}
+.verdict.ok{color:var(--ok)}
+.verdict.ng{color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;font-weight:700;z-index:50;box-shadow:var(--shadow)}
+ul.src{padding-left:18px;margin:0}
+ul.src li{margin-bottom:6px;font-size:14px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="app"></div>
+
+<script id="core">
+const CORE=(()=>{
+'use strict';
+const SQ=Math.sqrt;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function shuffle(arr,seed){const r=mulberry32(seed);const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function canon(o){if(Array.isArray(o))return o.map(canon);if(o&&typeof o==='object'){const r={};Object.keys(o).sort().forEach(k=>{r[k]=canon(o[k])});return r}return o}
+const key=o=>JSON.stringify(canon(o));
+
+/* ---------- statistics (normal distribution, 3PL IRT, EAP) ---------- */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y}
+const Phi=z=>0.5*(1+erf(z/Math.SQRT2));
+function invNorm(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425,ph=1-pl;let q,r;
+  if(p<pl){q=SQ(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p<=ph){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+  q=SQ(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+function bFrom(p,c,a){let pp=(p-c)/(1-c);pp=Math.min(.985,Math.max(.02,pp));return-invNorm(pp)*SQ(1+a*a)/a}
+function P(it,th){return it.c+(1-it.c)*Phi(it.a*(th-it.b))}
+function eap(items,resp){
+  const G=[];for(let t=-4;t<=4.001;t+=0.05)G.push(t);
+  const w=G.map(t=>{let ll=-t*t/2;items.forEach((it,i)=>{const p=Math.min(.9999,Math.max(.0001,P(it,t)));ll+=resp[i]?Math.log(p):Math.log(1-p)});return ll});
+  const m=Math.max.apply(null,w);const ws=w.map(x=>Math.exp(x-m));
+  let sw=0,st=0;ws.forEach((x,i)=>{sw+=x;st+=x*G[i]});const th=st/sw;
+  let sv=0;ws.forEach((x,i)=>{sv+=x*(G[i]-th)*(G[i]-th)});
+  return{theta:th,sd:SQ(sv/sw)};
+}
+
+/* ---------- domains ---------- */
+const DOM={mat:'行列推理',ser:'図形系列',spa:'空間認識',num:'数的推理',ver:'言語理解',ari:'算数推理',log:'論理推理',mem:'作動記憶'};
+const DOM_DESC={
+  mat:'3×3のマスに並んだ図形には規則があります。規則を見つけて、空欄（?）に入る図形を選んでください。',
+  ser:'左から順に並ぶ図形には変化の規則があります。次に来る図形を選んでください。',
+  spa:'図形の回転、紙を折って穴をあける、積み木の個数など、頭の中で形を動かす問題です。',
+  num:'数の並びの規則を見つけて、次に来る数を選んでください。',
+  ver:'言葉の関係、仲間外れ、共通点、語彙を問います。',
+  ari:'文章題を暗算で解きます。紙や電卓は使わないでください。',
+  log:'与えられた条件から、確実に言えることを導いてください。',
+  mem:'数字が1つずつ表示されます。すべて消えたあと、指示された順番で数字を入力してください。'
+};
+const INDEX={mat:'pr',ser:'pr',spa:'pr',num:'ql',ari:'ql',log:'ql',ver:'vc',mem:'wm'};
+const INDEX_NAME={pr:'知覚推理',vc:'言語理解',ql:'数理・論理',wm:'作動記憶'};
+const LIMITS={mat:120,ser:90,spa:120,num:90,ver:45,ari:120,log:150,mem:0};
+
+/* ---------- figure specs ---------- */
+const C=(s,f,x)=>Object.assign({s:s,f:f||'n',n:1,r:0,z:'m'},x||{});
+const SEG=(seg,x)=>Object.assign({s:'none',f:'n',n:1,r:0,z:'m',seg:seg.slice().sort()},x||{});
+const D=(s,dot,f)=>C(s,f||'n',{z:'l',dot:dot});
+const I=(o,s,f)=>C(o,'n',{z:'l',in:{s:s,f:f}});
+const X=(seg,s)=>SEG(seg,{in:{s:s,f:'f'}});
+const Y=(seg,f)=>SEG(seg,{in:{s:'tri',f:f}});
+/* polyominoes */
+const norm=p=>{const mx=Math.min.apply(null,p.map(q=>q[0])),my=Math.min.apply(null,p.map(q=>q[1]));return p.map(q=>[q[0]-mx,q[1]-my]).sort((a,b)=>a[0]-b[0]||a[1]-b[1])};
+const rot90=p=>p.map(q=>[-q[1],q[0]]);
+const mir=p=>p.map(q=>[-q[0],q[1]]);
+const rotN=(p,k)=>{for(let i=0;i<k;i++)p=rot90(p);return p};
+const pk=p=>JSON.stringify(norm(p));
+const isRot=(a,b)=>{for(let k=0;k<4;k++)if(pk(rotN(a,k))===pk(b))return true;return false};
+/* paper folding: L/R fold the left/right half over, T/B the top/bottom half */
+function foldSteps(folds){const steps=[];let reg={r0:0,r1:3,c0:0,c1:3};folds.forEach(f=>{const before=Object.assign({},reg);let line;if(f==='L'||f==='R'){const mid=(reg.c0+reg.c1+1)/2;line={axis:'c',mid:mid};if(f==='L')reg.c0=mid;else reg.c1=mid-1}else{const mid=(reg.r0+reg.r1+1)/2;line={axis:'r',mid:mid};if(f==='T')reg.r0=mid;else reg.r1=mid-1}steps.push({before:before,f:f,line:line})});return{steps:steps,reg:reg}}
+function unfold(folds,punch){const st=foldSteps(folds);let holes=punch.slice();for(let i=st.steps.length-1;i>=0;i--){const l=st.steps[i].line;const m=holes.map(h=>l.axis==='c'?[h[0],2*l.mid-1-h[1]]:[2*l.mid-1-h[0],h[1]]);holes=holes.concat(m)}return holes}
+const hk=h=>JSON.stringify(h.map(x=>x.join(',')).sort());
+
+const PL=[[0,0],[0,1],[0,2],[1,2]];
+const PP=[[0,0],[1,0],[0,1],[1,1],[0,2]];
+const PH=[[0,0],[1,0],[2,0],[2,1],[3,1],[0,-1]];
+const F1=['L'],F1P=[[1,2]];
+const F2=['T','L'],F2P=[[3,2]];
+const F3=['T','L'],F3P=[[2,2],[3,3]];
+const F4=['L','T','L'],F4P=[[2,3]];
+
+/* ---------- item bank (p = estimated pass rate of general adults, a = discrimination) ---------- */
+const QM='空欄（?）に入る図形はどれ？';
+const QS='次に来る図形はどれ？';
+const QN='次に来る数は？';
+const RAW=[
+/* 行列推理 */
+{id:'M01',dom:'mat',p:.95,a:1.2,q:QM,stim:{kind:'matrix',cells:[C('cir'),C('cir','h'),C('cir','f'),C('sq'),C('sq','h'),C('sq','f'),C('tri'),C('tri','h')]},opts:[C('tri','f'),C('tri','h'),C('tri'),C('sq','f'),C('cir','f'),C('dia','f')],exp:'横の段は同じ形、縦の列は同じ塗り方。右下は「三角・黒」。'},
+{id:'M02',dom:'mat',p:.9,a:1.2,q:QM,stim:{kind:'matrix',cells:[C('cir','f'),C('cir','f',{n:2}),C('cir','f',{n:3}),C('sq'),C('sq','n',{n:2}),C('sq','n',{n:3}),C('tri','h'),C('tri','h',{n:2})]},opts:[C('tri','h',{n:3}),C('tri','h',{n:2}),C('tri','h',{n:4}),C('tri','f',{n:3}),C('sq','h',{n:3}),C('cir','h',{n:3})],exp:'横の段は同じ形・同じ塗りで、右へ行くほど数が1つ増える。'},
+{id:'M03',dom:'mat',p:.85,a:1.2,q:QM,stim:{kind:'matrix',cells:[C('arrow','f',{r:0}),C('arrow','f',{r:45}),C('arrow','f',{r:90}),C('arrow','n',{r:90}),C('arrow','n',{r:135}),C('arrow','n',{r:180}),C('arrow','h',{r:180}),C('arrow','h',{r:225})]},opts:[C('arrow','h',{r:270}),C('arrow','h',{r:225}),C('arrow','h',{r:315}),C('arrow','f',{r:270}),C('arrow','n',{r:270}),C('arrow','h',{r:180})],exp:'矢印は右へ行くごとに時計回りに45°回転。段ごとに塗り方が変わる。'},
+{id:'M04',dom:'mat',p:.75,a:1.2,q:QM,stim:{kind:'matrix',cells:[C('cir'),C('sq','h'),C('tri','f'),C('sq','f'),C('tri'),C('cir','h'),C('tri','h'),C('cir','f')]},opts:[C('sq'),C('sq','h'),C('sq','f'),C('tri'),C('cir'),C('dia')],exp:'各段・各列に「丸・四角・三角」と「白・半分・黒」が1回ずつ現れる。足りないのは白い四角。'},
+{id:'M05',dom:'mat',p:.72,a:1.2,q:QM,stim:{kind:'matrix',cells:[SEG(['T']),SEG(['B']),SEG(['T','B']),SEG(['L']),SEG(['R']),SEG(['L','R']),SEG(['D1','T']),SEG(['D2'])]},opts:[SEG(['D1','D2','T']),SEG(['D1','D2']),SEG(['D2','T']),SEG(['D1','T','B']),SEG(['D1','D2','T','B']),SEG(['T','B'])],exp:'左の図＋真ん中の図＝右の図。線を重ね合わせる。'},
+{id:'M06',dom:'mat',p:.68,a:1.2,q:QM,stim:{kind:'matrix',cells:[D('sq','TL'),D('sq','TR'),D('sq','BR'),D('cir','TR'),D('cir','BR'),D('cir','BL'),D('hex','BR'),D('hex','BL')]},opts:[D('hex','TL'),D('hex','TR'),D('hex','BR'),D('hex','BL'),D('cir','TL'),D('sq','TL')],exp:'点は右へ行くごとに時計回りに角を1つ移動。段が下がるとスタート位置も1つ進む。'},
+{id:'M07',dom:'mat',p:.55,a:1.2,q:QM,stim:{kind:'matrix',cells:[SEG(['T','L']),SEG(['L','R']),SEG(['T','R']),SEG(['D1','B']),SEG(['D1','D2']),SEG(['B','D2']),SEG(['T','B','H']),SEG(['B','H','D1'])]},opts:[SEG(['T','D1']),SEG(['T','B','H','D1']),SEG(['B','H']),SEG(['T']),SEG(['D1']),SEG(['T','B','D1']),SEG(['T','H','D1'])],exp:'左と真ん中で共通する線は消え、片方だけにある線が残る（排他的論理和）。'},
+{id:'M08',dom:'mat',p:.5,a:1.2,q:QM,stim:{kind:'matrix',cells:[C('cir'),C('sq','f'),C('tri'),C('sq','n',{n:2}),C('tri','f',{n:2}),C('cir','n',{n:2}),C('tri','n',{n:3}),C('cir','f',{n:3})]},opts:[C('sq','n',{n:3}),C('sq','f',{n:3}),C('sq','n',{n:2}),C('tri','n',{n:3}),C('cir','n',{n:3}),C('sq','n',{n:4}),C('sq','h',{n:3})],exp:'各段に丸・四角・三角が1回ずつ。数は下の段ほど1つ増え、真ん中の列だけ黒塗り。'},
+{id:'M09',dom:'mat',p:.42,a:1.2,q:QM,stim:{kind:'matrix',cells:[I('sq','tri','n'),I('cir','dia','h'),I('hex','cir','f'),I('cir','cir','n'),I('hex','tri','h'),I('sq','dia','f'),I('hex','dia','n'),I('sq','cir','h')]},opts:[I('cir','tri','f'),I('cir','tri','h'),I('cir','dia','f'),I('sq','tri','f'),I('hex','tri','f'),I('cir','cir','f'),I('cir','tri','n'),I('tri','tri','f')],exp:'外の形・中の形はそれぞれ各段各列に1回ずつ。中の塗りは列ごとに白→半分→黒。'},
+{id:'M10',dom:'mat',p:.48,a:1.2,q:QM,stim:{kind:'matrix',cells:[SEG(['T','B','L','R']),SEG(['T','B']),SEG(['L','R']),SEG(['D1','D2','H']),SEG(['H']),SEG(['D1','D2']),SEG(['T','R','D2','H']),SEG(['R','H'])]},opts:[SEG(['T','D2']),SEG(['R','H']),SEG(['T','R','D2','H']),SEG(['T','R']),SEG(['D2','H']),SEG(['T','D2','H']),SEG(['T','D1'])],exp:'左の図から真ん中の図の線を取り除くと右の図になる（引き算）。'},
+{id:'M11',dom:'mat',p:.27,a:1.2,q:QM,stim:{kind:'matrix',cells:[C('tri','n',{n:3}),C('dia','h',{n:2}),C('star','f'),C('star','h',{n:3}),C('tri','f',{n:2}),C('dia'),C('dia','f',{n:3}),C('star','n',{n:2})]},opts:[C('tri','h'),C('tri'),C('tri','f'),C('dia','h'),C('star','h'),C('tri','h',{n:2}),C('tri','h',{n:3}),C('dia')],exp:'形は各段各列に1回ずつ。数は左から3・2・1。塗りは右上がりの斜め方向に白→半分→黒とずれていく。'},
+{id:'M12',dom:'mat',p:.17,a:1.2,q:QM,stim:{kind:'matrix',cells:[X(['T','L'],'cir'),X(['L','B'],'sq'),X(['T','B'],'tri'),X(['D1','R'],'sq'),X(['D1','D2'],'tri'),X(['R','D2'],'cir'),X(['T','H','R'],'tri'),X(['H','R','D2'],'cir')]},opts:[X(['T','D2'],'sq'),X(['T','D2'],'cir'),X(['T','D2'],'tri'),X(['T','H','R','D2'],'sq'),X(['H','R'],'sq'),X(['T','R'],'sq'),X(['T','D2','H'],'sq'),X(['D2'],'sq')],exp:'線は「共通部分が消える」ルール（排他的論理和）。中の形は各段各列に1回ずつ。'},
+{id:'M13',dom:'mat',p:.17,a:1.2,q:QM,stim:{kind:'matrix',cells:[Y(['T','D1'],'n'),Y(['R','D2'],'h'),Y(['B','D1'],'f'),Y(['L','H'],'n'),Y(['T','V'],'h'),Y(['R','H'],'f'),Y(['T','L','D2'],'n'),Y(['R','T','D1'],'h')]},opts:[Y(['B','R','D2'],'f'),Y(['B','R','D2'],'h'),Y(['B','R','D1'],'f'),Y(['L','B','D2'],'f'),Y(['B','R','D2'],'n'),Y(['T','L','D2'],'f'),Y(['R','D2'],'f'),Y(['B','D2','L','R'],'f')],exp:'線の図は右へ行くごとに90°時計回りに回転。中の三角の塗りは列ごとに白→半分→黒。'},
+/* 図形系列 */
+{id:'S01',dom:'ser',p:.9,a:1.1,q:QS,stim:{kind:'series',cells:[C('arrow','f',{r:0}),C('arrow','f',{r:90}),C('arrow','f',{r:180}),C('arrow','f',{r:270})]},opts:[C('arrow','f',{r:0}),C('arrow','f',{r:45}),C('arrow','f',{r:90}),C('arrow','f',{r:270}),C('arrow','f',{r:180})],exp:'矢印は毎回90°ずつ時計回りに回転。4回で元の向きに戻る。'},
+{id:'S02',dom:'ser',p:.8,a:1.1,q:QS,stim:{kind:'series',cells:[C('cir','f'),C('sq','f',{n:2}),C('cir','f',{n:3}),C('sq','f',{n:4})]},opts:[C('cir','f',{n:5}),C('sq','f',{n:5}),C('cir','f',{n:4}),C('cir','n',{n:5}),C('sq','f',{n:4})],exp:'形は丸と四角が交互、数は1つずつ増える。次は丸が5つ。'},
+{id:'S03',dom:'ser',p:.68,a:1.1,q:QS,stim:{kind:'series',cells:[D('sq','TL'),D('sq','TR','g'),D('sq','BR'),D('sq','BL','g')]},opts:[D('sq','TL'),D('sq','TL','g'),D('sq','TR'),D('sq','BL'),D('sq','BR','g')],exp:'点は時計回りに角を移動、塗りは白とグレーが交互。'},
+{id:'S04',dom:'ser',p:.55,a:1.1,q:QS,stim:{kind:'series',cells:[SEG(['T','D1']),SEG(['R','D2']),SEG(['B','D1']),SEG(['L','D2'])]},opts:[SEG(['T','D1']),SEG(['T','D2']),SEG(['L','D1']),SEG(['R','D1']),SEG(['B','D2'])],exp:'図全体が毎回90°時計回りに回転している。'},
+{id:'S05',dom:'ser',p:.45,a:1.1,q:QS,stim:{kind:'series',cells:[C('cir'),C('sq','f'),C('tri'),C('cir','f'),C('sq')]},opts:[C('tri','f'),C('tri'),C('cir','f'),C('cir'),C('sq','f'),C('dia','f')],exp:'形は3つ周期（丸→四角→三角）、塗りは2つ周期（白→黒）。次は黒い三角。'},
+/* 空間認識 */
+{id:'R01',dom:'spa',p:.85,q:'左の図形を回転させたものはどれ？（裏返したものは不正解）',stim:{kind:'poly',poly:PL},opts:[rotN(PL,1),mir(PL),rotN(mir(PL),1),rotN(mir(PL),2)],exp:'回転だけで重なるのは1つ。残りは裏返した（鏡像の）形。'},
+{id:'R02',dom:'spa',p:.7,q:'左の図形を回転させたものはどれ？（裏返したものは不正解）',stim:{kind:'poly',poly:PP},opts:[rotN(PP,2),mir(PP),rotN(mir(PP),1),rotN(mir(PP),2),rotN(mir(PP),3)],exp:'180°回転したものが正解。出っ張りの向きが鏡像になっているものは不正解。'},
+{id:'R03',dom:'spa',p:.5,q:'左の図形を回転させたものはどれ？（裏返したものは不正解）',stim:{kind:'poly',poly:PH},opts:[rotN(PH,3),mir(PH),rotN(mir(PH),1),rotN(mir(PH),2),rotN(mir(PH),3)],exp:'270°回転したものが正解。他はすべて鏡像。'},
+{id:'F01',dom:'spa',p:.8,q:'正方形の紙を図の順に折り、黒い点の位置に穴をあけました。広げると穴はどうなる？',stim:{kind:'fold',folds:F1,punch:F1P},opts:[unfold(F1,F1P),[[1,2],[2,2]],[[1,2]],[[1,1],[1,2],[2,1],[2,2]],[[1,1],[2,2]]],exp:'折り線を鏡にして穴が映る。左右対称の位置に2つ。'},
+{id:'F02',dom:'spa',p:.6,q:'正方形の紙を図の順に折り、黒い点の位置に穴をあけました。広げると穴はどうなる？',stim:{kind:'fold',folds:F2,punch:F2P},opts:[unfold(F2,F2P),[[3,2],[3,1]],[[3,2],[0,2]],[[3,2],[0,1]],[[3,2],[3,1],[2,2],[2,1]],[[3,1],[3,2],[0,1],[0,2],[1,1],[2,2]]],exp:'2回折ると紙は4枚重ね。穴は4つ、上下左右に鏡写し。'},
+{id:'F03',dom:'spa',p:.45,q:'正方形の紙を図の順に折り、黒い点の位置に穴をあけました。広げると穴はどうなる？',stim:{kind:'fold',folds:F3,punch:F3P},opts:[unfold(F3,F3P),[[2,2],[3,3],[2,1],[3,0]],[[2,2],[3,3],[1,2],[0,3]],[[2,2],[3,3],[1,1],[0,0]],[[2,2],[3,3],[2,1],[3,0],[1,2],[0,3]]],exp:'穴2つ×4枚重ね＝8個。縦の折り線と横の折り線で順に鏡写しにすると、両方の対角線上に並ぶ。'},
+{id:'B01',dom:'spa',p:.6,q:'積み木は全部で何個？（見えない部分も数える。宙に浮いた積み木はない）',stim:{kind:'blocks',map:[[1,2,3],[0,1,2],[0,0,1]]},opts:['10個','9個','8個','11個','12個'],exp:'奥の列は1+2+3=6個、真ん中の列は1+2=3個、手前は1個。合計10個。'},
+/* 数的推理 */
+{id:'N01',dom:'num',p:.9,q:QN,stim:{kind:'seq',text:'3,  6,  12,  24,  ?'},opts:['48','36','42','30','96'],exp:'前の数を2倍。24×2=48。'},
+{id:'N02',dom:'num',p:.75,q:QN,stim:{kind:'seq',text:'2,  3,  5,  8,  12,  ?'},opts:['17','16','15','18','20'],exp:'差が1,2,3,4と増える。次は+5で17。'},
+{id:'N03',dom:'num',p:.55,q:QN,stim:{kind:'seq',text:'100,  50,  52,  26,  28,  14,  ?'},opts:['16','7','12','28','15'],exp:'÷2と+2の繰り返し。14+2=16。'},
+{id:'N04',dom:'num',p:.6,q:QN,stim:{kind:'seq',text:'5,  10,  9,  18,  17,  34,  ?'},opts:['33','68','35','36','32'],exp:'×2と−1の繰り返し。34−1=33。'},
+{id:'N05',dom:'num',p:.55,q:QN,stim:{kind:'seq',text:'2,  6,  12,  20,  30,  ?'},opts:['42','40','36','44','48'],exp:'差が4,6,8,10と2ずつ増える。次は+12で42（n×(n+1)の並び）。'},
+{id:'N06',dom:'num',p:.45,q:QN,stim:{kind:'seq',text:'4,  7,  12,  19,  28,  ?'},opts:['39','37','40','36','41'],exp:'差が3,5,7,9と奇数で増える。次は+11で39。'},
+{id:'N07',dom:'num',p:.4,q:QN,stim:{kind:'seq',text:'1,  3,  2,  6,  5,  15,  14,  ?'},opts:['42','28','13','16','45'],exp:'×3と−1の繰り返し。14×3=42。'},
+{id:'N08',dom:'num',p:.3,q:QN,stim:{kind:'seq',text:'0,  1,  1,  2,  4,  7,  13,  ?'},opts:['24','20','26','21','25'],exp:'直前の3つの和（トリボナッチ数列）。4+7+13=24。'},
+{id:'N09',dom:'num',p:.18,a:1.1,q:QN,stim:{kind:'seq',text:'2,  12,  36,  80,  150,  ?'},opts:['252','240','210','300','225','280','196','260'],exp:'n²×(n+1)：1×2, 4×3, 9×4, 16×5, 25×6, 36×7=252。'},
+/* 言語理解 */
+{id:'V01',dom:'ver',p:.93,q:'仲間外れはどれ？',opts:['にんじん','りんご','みかん','ぶどう','もも'],exp:'にんじんだけ野菜。ほかは果物。'},
+{id:'V02',dom:'ver',p:.9,q:'「鳥：翼」と同じ関係になるのは？\n「魚：？」',opts:['ひれ','水','うろこ','海','泳ぐ'],exp:'移動に使う体の部位。翼で飛び、ひれで泳ぐ。'},
+{id:'V03',dom:'ver',p:.88,q:'「羅針盤：方角」と同じ関係になるのは？\n「秤（はかり）：？」',opts:['重さ','長さ','料理','金属','時間'],exp:'道具と、その道具が測るものの関係。'},
+{id:'V04',dom:'ver',p:.85,q:'「楽観：悲観」と同じ関係になるのは？\n「拡大：？」',opts:['縮小','増大','拡張','進化','収入'],exp:'反対語の関係。'},
+{id:'V05',dom:'ver',p:.8,q:'「詩」と「彫刻」に共通することとして最も適切なのは？',opts:['どちらも芸術作品である','どちらも古くからある','どちらも言葉を使う','どちらも鑑賞に時間がかかる','どちらも学校で習う'],exp:'最も本質的な共通点は「芸術作品」であること。'},
+{id:'V06',dom:'ver',p:.75,q:'「木を見て森を見ず」に最も近い意味は？',opts:['細部にこだわって全体を見失う','努力は必ず報われる','小さなことから大きなことが起きる','急ぐときほど安全な道を選ぶべき','経験が一番の教師である'],exp:'細かい部分に気を取られて、全体を見失うこと。'},
+{id:'V07',dom:'ver',p:.6,q:'仲間外れはどれ？',opts:['偏狭','寛大','寛容','鷹揚','度量'],exp:'偏狭だけ「心が狭い」という意味。ほかは心が広いことを表す。'},
+{id:'V08',dom:'ver',p:.6,q:'「希望」と「恐れ」に共通することとして最も適切なのは？',opts:['どちらも未来に向けられた感情','どちらも心地よい感情','どちらも過去についての感情','どちらも身体の状態','どちらも他人に対する感情'],exp:'どちらも「これから起きること」に向けた感情。'},
+{id:'V09',dom:'ver',p:.55,q:'「原因：結果」と同じ関係になるのは？\n「前提：？」',opts:['結論','仮説','理由','証明','条件'],exp:'前のものから後のものが導かれる関係。前提から結論が導かれる。'},
+{id:'V10',dom:'ver',p:.3,q:'「畢竟（ひっきょう）」の意味に最も近いのは？',opts:['結局・つまるところ','必ず','偶然に','とても急いで','静かに'],exp:'「畢竟」は「結局・つまるところ」。'},
+{id:'V11',dom:'ver',p:.25,q:'「嚆矢（こうし）」の意味に最も近いのは？',opts:['物事の始まり','鋭い批評','大きな失敗','遠い親戚','最後の手段'],exp:'合戦の始まりに放つ「鏑矢（かぶらや）」から転じて、物事の始まりを指す。'},
+/* 算数推理 */
+{id:'A01',dom:'ari',p:.95,q:'1個120円のパンを4個買い、1000円札で払いました。おつりはいくら？',opts:['520円','480円','620円','560円','420円'],exp:'120×4=480円。1000−480=520円。'},
+{id:'A02',dom:'ari',p:.7,q:'定価2,000円の商品が2割引き。さらに消費税10%がかかります。支払う金額は？',opts:['1,760円','1,800円','1,600円','1,620円','1,980円'],exp:'2000×0.8=1600円。1600×1.1=1760円。'},
+{id:'A03',dom:'ari',p:.72,q:'連続する3つの整数の和が72です。一番小さい数は？',opts:['23','24','22','21','25'],exp:'72÷3=24が真ん中の数。一番小さいのは23。'},
+{id:'A04',dom:'ari',p:.5,q:'8人が全員と1回ずつ握手をします。握手は全部で何回？',opts:['28回','56回','64回','16回','36回'],exp:'8人から2人を選ぶ組み合わせ。8×7÷2=28回。'},
+{id:'A05',dom:'ari',p:.5,q:'ある仕事をAさん1人なら6時間、Bさん1人なら3時間で終えます。2人で同時にすると何時間？',opts:['2時間','4.5時間','3時間','1.5時間','2.5時間'],exp:'1時間にAは1/6、Bは1/3進む。合わせて1/2なので2時間。'},
+{id:'A06',dom:'ari',p:.4,q:'池の睡蓮は毎日2倍に増え、48日目に池を全部覆いました。池の半分を覆ったのは何日目？',opts:['47日目','24日目','46日目','36日目','40日目'],exp:'毎日2倍なので、全部覆う前日に半分。47日目。'},
+{id:'A07',dom:'ari',p:.3,q:'バットとボールは合わせて1,100円。バットはボールより1,000円高い。ボールはいくら？',opts:['50円','100円','1,000円','55円','10円'],exp:'ボール50円＋バット1,050円＝1,100円。直感で出る「100円」は間違い。'},
+{id:'A08',dom:'ari',p:.25,q:'時計の針が3時15分を指しているとき、長針と短針がつくる小さいほうの角度は？',opts:['7.5°','0°','15°','22.5°','5°'],exp:'長針は3の位置（90°）。短針は15分で0.5°×15=7.5°進み97.5°。差は7.5°。'},
+/* 論理推理 */
+{id:'L01',dom:'log',p:.9,q:'「すべての猫は動物である」「すべての動物は生き物である」\nこのとき、確実に言えるのは？',opts:['すべての猫は生き物である','すべての生き物は猫である','猫以外の動物はいない','ある生き物は猫ではない','動物はすべて猫である'],exp:'猫⊂動物⊂生き物。三段論法。'},
+{id:'L02',dom:'log',p:.75,q:'AはBより背が高い。CはAより背が高い。DはBより背が低い。\n一番背が低いのは？',opts:['D','B','A','C','判断できない'],exp:'C＞A＞B＞D。'},
+{id:'L03',dom:'log',p:.7,q:'「ある画家は詩人である」「すべての詩人は夢想家である」\nこのとき、確実に言えるのは？',opts:['ある画家は夢想家である','すべての画家は夢想家である','すべての夢想家は詩人である','画家は詩人ではない','ある詩人は画家ではない'],exp:'詩人である画家は必ず夢想家。つまり「ある画家は夢想家」。'},
+{id:'L04',dom:'log',p:.45,q:'この島の住人は、常に本当のことを言う「正直者」か、常に嘘を言う「嘘つき」のどちらかです。\nAは「Bは嘘つきだ」と言い、Bは「AもBも嘘つきだ」と言いました。正しいのは？',opts:['Aは正直者、Bは嘘つき','Aは嘘つき、Bは正直者','2人とも正直者','2人とも嘘つき','判断できない'],exp:'Bが正直者なら「自分は嘘つき」と言う矛盾。よってBは嘘つき。その発言「2人とも嘘つき」は嘘なので、Aは正直者。Aの発言とも一致する。'},
+{id:'L05',dom:'log',p:.35,q:'3つの箱に「りんご」「みかん」「りんごとみかん」のラベルが貼ってありますが、ラベルは3つとも間違っています。\n「りんごとみかん」の箱から1つ取り出すと、りんごでした。正しい中身は？',opts:['「りんごとみかん」＝りんご、「りんご」＝みかん、「みかん」＝りんごとみかん','「りんごとみかん」＝りんご、「りんご」＝りんごとみかん、「みかん」＝みかん','「りんごとみかん」＝みかん、「りんご」＝りんごとみかん、「みかん」＝りんご','まだ判断できない','「りんごとみかん」＝りんご、ほかは判断できない'],exp:'ラベルは全部間違いなので「りんごとみかん」の箱は単品。りんごが出たのでりんご箱。「みかん」の箱はみかんではなく、りんごも決まったので「りんごとみかん」。残った「りんご」の箱がみかん。'},
+{id:'L06',dom:'log',p:.28,q:'カードの片面には数字、裏面には色が塗られています。\n「偶数のカードの裏は必ず赤」というルールが守られているか確かめるために、裏返す必要があるカードは？',stim:{kind:'cards',cards:[['8','num'],['3','num'],['赤','red'],['茶','brown']]},opts:['8と茶','8と赤','8だけ','8と3と赤','4枚すべて'],exp:'ルールを破るのは「偶数の裏が赤以外」の場合だけ。8（裏が赤か？）と茶（裏が偶数か？）を確認する。赤の裏が奇数でも違反ではない。'},
+/* 作動記憶 */
+{id:'W01',dom:'mem',type:'span',p:.95,a:.9,dir:'f',seq:[6,2,9,4,1]},
+{id:'W02',dom:'mem',type:'span',p:.85,a:.9,dir:'f',seq:[5,1,8,3,9,2]},
+{id:'W03',dom:'mem',type:'span',p:.6,a:.9,dir:'f',seq:[4,9,2,7,1,8,5]},
+{id:'W04',dom:'mem',type:'span',p:.35,a:.9,dir:'f',seq:[2,7,5,1,9,4,8,3]},
+{id:'W05',dom:'mem',type:'span',p:.8,a:.9,dir:'b',seq:[8,2,5,9]},
+{id:'W06',dom:'mem',type:'span',p:.55,a:.9,dir:'b',seq:[3,7,1,6,4]},
+/* 一発チャレンジ専用の高難度問題（solo） */
+{id:'S06',dom:'ser',solo:true,p:.35,a:1.1,q:QS,stim:{kind:'series',cells:[C('cir','f'),C('sq','f'),C('cir','f',{n:2}),C('sq','f',{n:3})]},opts:[C('cir','f',{n:5}),C('cir','f',{n:4}),C('sq','f',{n:5}),C('cir','f',{n:3}),C('sq','f',{n:4})],exp:'形は丸と四角が交互。数は1,1,2,3と「前の2つの和」（フィボナッチ数列）で増えるので次は5。'},
+{id:'F04',dom:'spa',solo:true,p:.35,q:'正方形の紙を図の順に折り、黒い点の位置に穴をあけました。広げると穴はどうなる？',stim:{kind:'fold',folds:F4,punch:F4P},opts:[unfold(F4,F4P),[[1,2],[1,3],[2,2],[2,3]],[[0,0],[0,1],[0,2],[0,3],[3,0],[3,1],[3,2],[3,3]],[[1,2],[1,3],[2,2],[2,3],[1,0],[2,0]],[[0,2],[0,3],[1,2],[1,3],[2,2],[2,3],[3,2],[3,3]]],exp:'3回折ると8枚重ね。穴は8個で、真ん中2段がすべて穴になる。'},
+{id:'N10',dom:'num',solo:true,p:.17,a:1.1,q:QN,stim:{kind:'seq',text:'1,  11,  21,  1211,  111221,  ?'},opts:['312211','1112221','13112221','311221','321211','112211','311211','1231221'],exp:'前の数を「読み上げた」もの（look-and-say数列）。111221は「1が3つ、2が2つ、1が1つ」→312211。'},
+{id:'N11',dom:'num',solo:true,p:.2,a:1.1,q:QN,stim:{kind:'seq',text:'6,  24,  60,  120,  210,  ?'},opts:['336','300','330','315','360','280','294','350'],exp:'連続3整数の積：1×2×3, 2×3×4, 3×4×5, 4×5×6, 5×6×7, 6×7×8=336。'},
+{id:'V12',dom:'ver',solo:true,p:.23,q:'「浩瀚（こうかん）」の意味に最も近いのは？',opts:['書物などの量が多く膨大なこと','川の流れが速いこと','心が広く寛大なこと','非常に古いこと','深く静かなこと'],exp:'「浩瀚」は書物などが多く、量が膨大なこと。'},
+{id:'V13',dom:'ver',solo:true,p:.4,q:'「鼎談（ていだん）」の意味に最も近いのは？',opts:['3人で話し合うこと','料理を囲んで談笑すること','激しく言い争うこと','手紙でやり取りすること','2人で向き合って話すこと'],exp:'「鼎（かなえ）」は3本足の器。そこから3人で話し合うことを指す。'},
+{id:'A09',dom:'ari',solo:true,p:.45,q:'2つのサイコロを同時に振ります。出た目の和が7になる確率は？',opts:['1/6','1/12','1/7','7/36','1/9'],exp:'36通りのうち、和が7になるのは(1,6)(2,5)(3,4)(4,3)(5,2)(6,1)の6通り。6/36=1/6。'},
+{id:'A10',dom:'ari',solo:true,p:.5,q:'ある商品を20%値上げし、その後20%値下げしました。元の値段と比べると？',opts:['4%安い','元と同じ','4%高い','2%安い','1%安い'],exp:'1.2×0.8=0.96。元より4%安い。'},
+{id:'A11',dom:'ari',solo:true,p:.3,q:'山道を時速4kmで登り、同じ道を時速6kmで下りました。往復の平均の速さは？',opts:['時速4.8km','時速5km','時速5.2km','時速4.5km','時速10km'],exp:'片道12kmとすると登り3時間、下り2時間。24km÷5時間=時速4.8km。単純平均の5kmは間違い。'},
+{id:'L07',dom:'log',solo:true,p:.4,q:'「すべてのAはBではない」「あるCはBである」\nこのとき、確実に言えるのは？',opts:['あるCはAではない','すべてのCはAではない','あるAはCである','すべてのBはCである','AとCに共通するものはない'],exp:'Bである「あるC」はAではあり得ない。よって「あるCはAではない」。'},
+{id:'L08',dom:'log',solo:true,p:.33,q:'3つのドアの1つに賞品があります。あなたが1つ選んだあと、賞品の場所を知っている司会者が、残り2つのうちハズレのドアを1つ開けました。賞品を当てる確率を最も高くするには？',opts:['選び直す（当たる確率は2/3になる）','どちらでも同じ（1/2）','最初の選択を守る（当たる確率は2/3）','選び直す（当たる確率は1/2になる）','判断できない'],exp:'最初の選択が当たりの確率は1/3のまま。残りの2/3は「開けられなかったもう1つのドア」に集まる（モンティ・ホール問題）。'},
+{id:'W07',dom:'mem',type:'span',solo:true,p:.3,a:.9,dir:'b',seq:[9,1,7,2,8,4]},
+{id:'W08',dom:'mem',type:'span',solo:true,p:.15,a:.9,dir:'f',seq:[3,8,2,9,5,1,7,4,6]}
+];
+const QUICK_IDS=['M01','M04','M07','M09','S03','R02','N01','N02','N04','V02','V07','V09','V10','A02','A04','A07','L02','L04','W02','W05'];
+
+function build(it){
+  const a=it.a||1;
+  if(it.type==='span'){const b=bFrom(it.p,0,a);return Object.assign({},it,{c:0,a:a,b:b,iq:Math.round(100+15*b),q:(it.dir==='f'?'順番どおり':'逆の順番で')+'入力：'+it.seq.length+'桁'})}
+  const order=shuffle(it.opts.map((_,i)=>i),hash(it.id));
+  const opts=order.map(i=>it.opts[i]);const ans=order.indexOf(0);
+  const c=1/opts.length;const b=bFrom(it.p,c,a);
+  return Object.assign({},it,{type:it.type||'mc',opts:opts,ans:ans,c:c,a:a,b:b,iq:Math.round(100+15*b)});
+}
+const BANK=RAW.map(build);
+const FULL=BANK.filter(it=>!it.solo);
+const bandOf=iq=>iq<110?'b1':iq<120?'b2':iq<130?'b3':'b4';
+
+/* ---------- scoring ---------- */
+function score(items,answers){
+  const resp=items.map(it=>answers[it.id]&&answers[it.id].u?1:0);
+  const o=eap(items,resp);
+  const idx={};
+  Object.keys(INDEX_NAME).forEach(k=>{const sub=[];items.forEach((it,i)=>{if(INDEX[it.dom]===k)sub.push([it,resp[i]])});if(sub.length>=2){const e=eap(sub.map(x=>x[0]),sub.map(x=>x[1]));idx[k]={iq:Math.round(100+15*e.theta),n:sub.length,correct:sub.filter(x=>x[1]).length}}});
+  return{iq:Math.round(100+15*o.theta),ci:Math.round(1.645*o.sd*15),pct:Phi(o.theta),theta:o.theta,sd:o.sd,correct:resp.filter(x=>x).length,total:items.length,idx:idx};
+}
+function classify(iq){return iq>=130?'非常に高い':iq>=120?'高い':iq>=110?'平均の上':iq>=90?'平均':iq>=80?'平均の下':iq>=70?'低い':'非常に低い'}
+function rarity(pct){if(pct>=0.5){const top=(1-pct)*100;const n=Math.min(1000000,Math.round(1/Math.max(1e-6,1-pct)));return'上位'+(top<10?top.toFixed(1):Math.round(top))+'%・'+n.toLocaleString()+'人に1人'}return'下位'+(pct*100<10?(pct*100).toFixed(1):Math.round(pct*100))+'%'}
+
+/* ---------- SVG renderers ---------- */
+let uid=0;
+const POS={1:[[50,50]],2:[[30,50],[70,50]],3:[[50,30],[30,70],[70,70]],4:[[30,30],[70,30],[30,70],[70,70]],5:[[27,27],[73,27],[27,73],[73,73],[50,50]]};
+const RAD={2:15,3:14,4:15,5:12};
+const DOTP={TL:[30,30],TR:[70,30],BL:[30,70],BR:[70,70],T:[50,24],B:[50,76],L:[24,50],R:[76,50],C:[50,50]};
+const SG={T:[14,14,86,14],B:[14,86,86,86],L:[14,14,14,86],R:[86,14,86,86],D1:[14,14,86,86],D2:[86,14,14,86],H:[14,50,86,50],V:[50,14,50,86]};
+function shapePath(s,cx,cy,r,rot){
+  const pts=(n,off)=>{const a=[];for(let i=0;i<n;i++){const ang=(off+i*360/n+rot)*Math.PI/180;a.push([cx+r*Math.cos(ang),cy+r*Math.sin(ang)])}return a};
+  const poly=p=>'M'+p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join('L')+'Z';
+  const xf=p=>{const t=rot*Math.PI/180;return poly(p.map(q=>[cx+r*(q[0]*Math.cos(t)-q[1]*Math.sin(t)),cy+r*(q[0]*Math.sin(t)+q[1]*Math.cos(t))]))};
+  switch(s){
+    case'cir':return'M'+(cx-r)+','+cy+'a'+r+','+r+' 0 1,0 '+(2*r)+',0a'+r+','+r+' 0 1,0 '+(-2*r)+',0Z';
+    case'sq':return poly(pts(4,-45));
+    case'dia':return poly(pts(4,-90));
+    case'tri':return poly(pts(3,-90));
+    case'pent':return poly(pts(5,-90));
+    case'hex':return poly(pts(6,0));
+    case'star':{const o=[];for(let i=0;i<10;i++){const rr=i%2?r*0.45:r;const ang=(-90+i*36+rot)*Math.PI/180;o.push([cx+rr*Math.cos(ang),cy+rr*Math.sin(ang)])}return poly(o)}
+    case'arrow':return xf([[0,-1],[0.75,-0.25],[0.32,-0.25],[0.32,1],[-0.32,1],[-0.32,-0.25],[-0.75,-0.25]]);
+    default:return'';
+  }
+}
+function shapeEl(s,cx,cy,r,rot,f){
+  const d=shapePath(s,cx,cy,r,rot);const sw=4;
+  if(f==='f')return'<path d="'+d+'" fill="currentColor" stroke="currentColor" stroke-width="'+sw+'" stroke-linejoin="round"/>';
+  if(f==='g')return'<path d="'+d+'" fill="currentColor" fill-opacity=".32" stroke="currentColor" stroke-width="'+sw+'" stroke-linejoin="round"/>';
+  if(f==='h'){const id='cp'+(uid++);return'<clipPath id="'+id+'"><rect x="'+(cx-r-sw)+'" y="'+(cy-r-sw)+'" width="'+(r+sw)+'" height="'+(2*r+2*sw)+'"/></clipPath><path d="'+d+'" fill="currentColor" clip-path="url(#'+id+')"/><path d="'+d+'" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linejoin="round"/>'}
+  return'<path d="'+d+'" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linejoin="round"/>';
+}
+function cellSVG(sp,cls){
+  cls=cls||'cell';
+  if(sp==null)return'<svg class="'+cls+' q" viewBox="0 0 100 100" aria-label="空欄"><text x="50" y="64" text-anchor="middle" font-size="44" font-weight="700" fill="currentColor">?</text></svg>';
+  let body='';
+  if(sp.seg)sp.seg.forEach(k=>{const g=SG[k];body+='<line x1="'+g[0]+'" y1="'+g[1]+'" x2="'+g[2]+'" y2="'+g[3]+'" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>'});
+  if(sp.s&&sp.s!=='none'){
+    let r={s:11,m:19,l:30}[sp.z||'m'];const n=sp.n||1;
+    if(sp.dot)r=36;if(sp.in)r=32;if(sp.s==='arrow'&&n===1)r=30;
+    if(n>=2)r=RAD[n]||12;
+    (POS[n]||POS[1]).forEach(p=>{body+=shapeEl(sp.s,p[0],p[1],r,sp.r||0,sp.f||'n')});
+  }
+  if(sp.in)body+=shapeEl(sp.in.s,50,50,11,sp.in.r||0,sp.in.f||'f');
+  if(sp.dot){const p=DOTP[sp.dot];body+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5.5" fill="currentColor"/>'}
+  return'<svg class="'+cls+'" viewBox="0 0 100 100">'+body+'</svg>';
+}
+function polySVG(poly,cls){const p=norm(poly);const w=Math.max.apply(null,p.map(q=>q[0]))+1,h=Math.max.apply(null,p.map(q=>q[1]))+1;const u=84/Math.max(w,h,4);const ox=(100-w*u)/2,oy=(100-h*u)/2;return'<svg class="'+(cls||'cell')+'" viewBox="0 0 100 100">'+p.map(q=>'<rect x="'+(ox+q[0]*u).toFixed(1)+'" y="'+(oy+q[1]*u).toFixed(1)+'" width="'+u.toFixed(1)+'" height="'+u.toFixed(1)+'" fill="currentColor" fill-opacity=".82" stroke="var(--surface)" stroke-width="2.5"/>').join('')+'</svg>'}
+function paperBase(){let s='<rect x="6" y="6" width="88" height="88" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-dasharray="3 3"/>';for(let i=1;i<4;i++){s+='<line x1="'+(6+22*i)+'" y1="6" x2="'+(6+22*i)+'" y2="94" stroke="currentColor" stroke-opacity=".12"/><line x1="6" y1="'+(6+22*i)+'" x2="94" y2="'+(6+22*i)+'" stroke="currentColor" stroke-opacity=".12"/>'}return s}
+function holesSVG(holes,cls){return'<svg class="'+(cls||'cell')+'" viewBox="0 0 100 100"><rect x="6" y="6" width="88" height="88" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-width="2.5"/>'+paperBase().replace(/stroke-dasharray="3 3"/,'')+holes.map(h=>'<circle cx="'+(17+22*h[1])+'" cy="'+(17+22*h[0])+'" r="6" fill="currentColor"/>').join('')+'</svg>'}
+function regionRect(g){return'<rect x="'+(6+22*g.c0)+'" y="'+(6+22*g.r0)+'" width="'+(22*(g.c1-g.c0+1))+'" height="'+(22*(g.r1-g.r0+1))+'" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="2.5"/>'}
+function foldHTML(st){
+  const fs=foldSteps(st.folds);
+  const svgs=fs.steps.map(s=>{const g=s.before;let line,arrow;
+    if(s.line.axis==='c'){const Xc=6+22*s.line.mid,y0=6+22*g.r0,y1=6+22*(g.r1+1),ym=(y0+y1)/2;line='<line x1="'+Xc+'" y1="'+y0+'" x2="'+Xc+'" y2="'+y1+'" stroke="currentColor" stroke-dasharray="4 3" stroke-width="2"/>';const d=s.f==='L'?1:-1;const ex=Xc+14*d;arrow='<path d="M'+(Xc-14*d)+','+ym+' A14,14 0 0 '+(d===1?1:0)+' '+ex+','+ym+'" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M'+ex+','+ym+' l-5,-6 M'+ex+','+ym+' l5,-6" fill="none" stroke="currentColor" stroke-width="2.5"/>'}
+    else{const Yc=6+22*s.line.mid,x0=6+22*g.c0,x1=6+22*(g.c1+1),xm=(x0+x1)/2;line='<line x1="'+x0+'" y1="'+Yc+'" x2="'+x1+'" y2="'+Yc+'" stroke="currentColor" stroke-dasharray="4 3" stroke-width="2"/>';const d=s.f==='T'?1:-1;const ey=Yc+14*d;arrow='<path d="M'+xm+','+(Yc-14*d)+' A14,14 0 0 '+(d===1?1:0)+' '+xm+','+ey+'" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M'+xm+','+ey+' l6,-5 M'+xm+','+ey+' l6,5" fill="none" stroke="currentColor" stroke-width="2.5"/>'}
+    return'<svg class="cell" viewBox="0 0 100 100">'+paperBase()+regionRect(g)+line+arrow+'</svg>'});
+  const fin='<svg class="cell" viewBox="0 0 100 100">'+paperBase()+regionRect(fs.reg)+st.punch.map(h=>'<circle cx="'+(17+22*h[1])+'" cy="'+(17+22*h[0])+'" r="6" fill="currentColor"/>').join('')+'</svg>';
+  return'<div class="srow foldrow">'+svgs.join('<span class="arr">→</span>')+'<span class="arr">→</span>'+fin+'<span class="arr">→ 広げると？</span></div>';
+}
+function blocksSVG(map){
+  const s=22,a=s*0.866,b=s*0.5;const cubes=[];
+  map.forEach((row,y)=>row.forEach((h,x)=>{for(let z=0;z<h;z++)cubes.push([x,y,z])}));
+  cubes.sort((p,q)=>(p[0]+p[1])-(q[0]+q[1])||p[2]-q[2]);
+  const Pt=(x,y,z)=>[(x-y)*a,(x+y)*b-z*s];
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;const faces=[];
+  cubes.forEach(c=>{const x=c[0],y=c[1],z=c[2];
+    const top=[Pt(x,y,z+1),Pt(x+1,y,z+1),Pt(x+1,y+1,z+1),Pt(x,y+1,z+1)];
+    const right=[Pt(x+1,y,z),Pt(x+1,y+1,z),Pt(x+1,y+1,z+1),Pt(x+1,y,z+1)];
+    const left=[Pt(x,y+1,z),Pt(x+1,y+1,z),Pt(x+1,y+1,z+1),Pt(x,y+1,z+1)];
+    [[top,.14],[left,.52],[right,.32]].forEach(f=>{faces.push(f);f[0].forEach(p=>{minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);miny=Math.min(miny,p[1]);maxy=Math.max(maxy,p[1])})})});
+  const m=6;
+  return'<svg class="blocks" viewBox="'+(minx-m).toFixed(1)+' '+(miny-m).toFixed(1)+' '+(maxx-minx+2*m).toFixed(1)+' '+(maxy-miny+2*m).toFixed(1)+'">'+faces.map(f=>'<polygon points="'+f[0].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="currentColor" fill-opacity="'+f[1]+'" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>').join('')+'</svg>';
+}
+function stimHTML(st){
+  if(!st)return'';
+  if(st.kind==='matrix')return'<div class="mgrid">'+st.cells.concat([null]).map(c=>cellSVG(c)).join('')+'</div>';
+  if(st.kind==='series')return'<div class="srow">'+st.cells.map(c=>cellSVG(c)).join('<span class="arr">→</span>')+'<span class="arr">→</span>'+cellSVG(null)+'</div>';
+  if(st.kind==='poly')return'<div class="single">'+polySVG(st.poly)+'</div>';
+  if(st.kind==='fold')return foldHTML(st);
+  if(st.kind==='blocks')return'<div class="single big">'+blocksSVG(st.map)+'</div>';
+  if(st.kind==='seq')return'<div class="seqbox">'+esc(st.text)+'</div>';
+  if(st.kind==='cards')return'<div class="cards">'+st.cards.map(c=>'<div class="pcard '+c[1]+'">'+esc(c[0])+'</div>').join('')+'</div>';
+  return'';
+}
+function optHTML(it,o){if(typeof o==='string')return esc(o);const k=it.stim&&it.stim.kind;if(k==='poly')return polySVG(o);if(k==='fold')return holesSVG(o);return cellSVG(o)}
+function optsHTML(it,sel){const vis=typeof it.opts[0]!=='string';return'<div class="'+(vis?'opts':'topts')+'">'+it.opts.map((o,i)=>'<button type="button" class="opt'+(vis?' v':'')+(sel===i?' sel':'')+'" data-opt="'+i+'"><span class="k">'+(i+1)+'</span>'+optHTML(it,o)+'</button>').join('')+'</div>'}
+function radarSVG(vals,labels){const n=vals.length,cx=120,cy=118,R=74;const pt=(i,r)=>{const ang=-Math.PI/2+i*2*Math.PI/n;return[cx+r*Math.cos(ang),cy+r*Math.sin(ang)]};let s='<svg viewBox="0 0 240 236" class="radar" role="img" aria-label="分野別正答率">';[.25,.5,.75,1].forEach(f=>{s+='<polygon points="'+vals.map((_,i)=>pt(i,R*f).map(v=>v.toFixed(1)).join(',')).join(' ')+'" fill="none" stroke="currentColor" stroke-opacity=".18"/>'});for(let i=0;i<n;i++){const p=pt(i,R);s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="currentColor" stroke-opacity=".18"/>';const l=pt(i,R+22);s+='<text x="'+l[0].toFixed(1)+'" y="'+(l[1]+4).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" fill-opacity=".8">'+esc(labels[i])+'</text>'}s+='<polygon points="'+vals.map((v,i)=>pt(i,R*Math.max(.04,v)).map(x=>x.toFixed(1)).join(',')).join(' ')+'" fill="var(--accent)" fill-opacity=".35" stroke="var(--accent)" stroke-width="2"/>';vals.forEach((v,i)=>{const p=pt(i,R*Math.max(.04,v));s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="var(--accent)"/>'});return s+'</svg>'}
+
+return{BANK:BANK,FULL:FULL,QUICK_IDS:QUICK_IDS,DOM:DOM,DOM_DESC:DOM_DESC,INDEX:INDEX,INDEX_NAME:INDEX_NAME,LIMITS:LIMITS,score:score,classify:classify,rarity:rarity,bandOf:bandOf,esc:esc,key:key,isRot:isRot,unfold:unfold,hk:hk,foldSteps:foldSteps,cellSVG:cellSVG,polySVG:polySVG,holesSVG:holesSVG,stimHTML:stimHTML,optHTML:optHTML,optsHTML:optsHTML,radarSVG:radarSVG,eap:eap,Phi:Phi};
+})();
+if(typeof module!=='undefined')module.exports=CORE;
+</script>
+
+<script>
+(()=>{
+'use strict';
+const K=CORE;const {BANK,FULL,QUICK_IDS,DOM,DOM_DESC,INDEX_NAME,LIMITS,esc,stimHTML,optHTML,optsHTML,radarSVG,score,classify,rarity,bandOf}=K;
+const app=document.getElementById('app');
+const LS='iqlab_v1';
+const store={get(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){return{}}},set(d){try{localStorage.setItem(LS,JSON.stringify(d))}catch(e){}}};
+let S={screen:'home'};let tick=null;let spanTimers=[];
+/* ---------- みんなの結果を集計（Google Apps Script で配信したときだけ動く） ---------- */
+const GAS_RUN=(()=>{try{return!!(window.google&&google.script&&google.script.run)}catch(e){return false}})();
+const API=(window.API_URL&&String(window.API_URL).indexOf('https://script.google.com/')===0)?window.API_URL:null;
+const ONLINE=GAS_RUN||!!API;
+const appUrl=()=>{const u=window.APP_URL;return(u&&u.indexOf('http')===0)?u:location.href};
+function anonId(){const d=store.get();if(!d.uid){d.uid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);store.set(d)}return d.uid}
+const device=()=>window.innerWidth>=960?'PC':window.innerWidth>=600?'タブレット':'スマホ';
+function send(payload,cb){
+  if(GAS_RUN){try{google.script.run.withSuccessHandler(r=>{if(cb&&r)cb(r)}).withFailureHandler(()=>{}).saveResult(payload)}catch(e){}return}
+  if(API){fetch(API,{method:'POST',body:JSON.stringify(payload)}).then(r=>r.json()).then(r=>{if(cb&&r)cb(r)}).catch(()=>{})}
+}
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const MODE_NAME={full:'本格テスト',quick:'クイック診断'};
+function clearTimers(){if(tick){clearInterval(tick);tick=null}spanTimers.forEach(clearTimeout);spanTimers=[]}
+function go(screen,extra){clearTimers();S=Object.assign({screen:screen},extra||{});render();window.scrollTo(0,0)}
+function render(){document.body.classList.toggle('wide',S.screen==='test'||S.screen==='review');({home,test,result,review,single,sresult,method})[S.screen]()}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+const head=(btnGo,btnLabel)=>'<header class="top"><div class="logo">IQ<span>Lab</span></div><button type="button" class="ghost" data-go="'+btnGo+'">'+btnLabel+'</button></header>';
+
+/* ---------- home ---------- */
+function home(){
+  const h=(store.get().hist||[]).slice().reverse().slice(0,8);const isPC=window.innerWidth>=960;
+  app.innerHTML='<div class="wrap">'+head('method','採点の仕組み')+
+  '<h1>本格IQテスト</h1><p class="lead">研究や実際の知能検査で使われる問題形式（行列推理・数列・語彙・作動記憶 など8分野）をもとに作成。回答パターンから項目反応理論（IRT）で推定IQを算出します。</p>'+
+  '<div class="modes">'+
+  '<button type="button" class="mode" data-start="full"><span class="mtag">'+(isPC?'PC推奨':'PCでじっくり')+'</span><div class="mtitle">本格テスト</div><div class="mdesc">'+FULL.length+'問・45分・8分野<br>4つの指標とレーダーチャートで分析</div></button>'+
+  '<button type="button" class="mode" data-start="quick"><span class="mtag alt">スマホOK</span><div class="mtitle">クイック診断</div><div class="mdesc">'+QUICK_IDS.length+'問・12分<br>短時間でざっくり推定</div></button>'+
+  '<button type="button" class="mode" data-go="single"><span class="mtag alt2">1問だけ</span><div class="mtitle">一発チャレンジ</div><div class="mdesc">これが解けたらIQ◯◯<br>レベルを選んで挑戦</div></button>'+
+  '</div>'+
+  (h.length?'<section class="card"><h3>この端末の履歴</h3>'+h.map(x=>'<div class="hrow"><span>'+esc(x.date)+'</span><span>'+(MODE_NAME[x.mode]||'')+'</span><b>IQ '+x.iq+'</b></div>').join('')+'</section>':'')+
+  '<p class="note">娯楽・教養目的の推定値です。医学的・臨床的な知能検査ではありません。'+(ONLINE?'<br>結果は匿名で集計され、参加者内の順位表示と問題の難易度調整に使われます（名前や連絡先は集めません）。':'')+'</p></div>';
+}
+
+/* ---------- test flow ---------- */
+const remaining=()=>S.limit-(Date.now()-S.start)/1000;
+function startTest(mode){
+  const items=mode==='full'?FULL:QUICK_IDS.map(id=>BANK.find(b=>b.id===id));
+  go('test',{mode:mode,items:items,idx:0,answers:{},limit:mode==='full'?45*60:12*60,start:Date.now(),sel:null,intro:true,qStart:Date.now()});
+  tick=setInterval(()=>{const r=remaining();const el=document.getElementById('timer');if(el){el.textContent=fmt(r);el.classList.toggle('low',r<120)}if(r<=0)finish()},500);
+}
+function test(){
+  const it=S.items[S.idx],n=S.items.length;
+  const doms=[];S.items.forEach((x,i)=>{let d=doms.find(y=>y.k===x.dom);if(!d){d={k:x.dom,t:0,d:0};doms.push(d)}d.t++;if(i<S.idx)d.d++});
+  const side='<div class="card"><div class="sidet">セクション</div>'+doms.map(d=>'<div class="srow2'+(d.k===it.dom?' cur':'')+'"><span>'+DOM[d.k]+'</span><span>'+d.d+'/'+d.t+'</span></div>').join('')+'<div class="hint">1〜9キー：選択肢を選ぶ<br>Enter：次へ　S：スキップ<br>制限時間を過ぎると自動で終了します。</div></div>';
+  let body;
+  if(S.intro)body='<div class="card intro"><div class="dom">セクション '+(doms.findIndex(d=>d.k===it.dom)+1)+' / '+doms.length+'</div><h2>'+DOM[it.dom]+'</h2><p>'+DOM_DESC[it.dom]+'</p><p class="muted" style="font-size:13px">この分野は '+doms.find(d=>d.k===it.dom).t+' 問。</p><button type="button" class="btn" data-act="intro">開始する</button></div>';
+  else if(it.type==='span')body=spanCard(it);
+  else body=qCard(it);
+  app.innerHTML='<div class="wrap"><div class="thead"><span>'+MODE_NAME[S.mode]+'　<b>'+(S.idx+1)+'</b> / '+n+'</span><span class="timer" id="timer">'+fmt(remaining())+'</span></div><div class="bar"><i style="width:'+(S.idx/n*100)+'%"></i></div><div class="tlay"><aside class="side">'+side+'</aside><main>'+body+'</main></div></div>';
+  focusSpan();
+}
+function qCard(it){return'<div class="card"><div class="dom">'+DOM[it.dom]+'</div><p class="qtext">'+esc(it.q)+'</p>'+stimHTML(it.stim)+optsHTML(it,S.sel)+'<div class="nav"><button type="button" class="btn sec" data-act="skip">スキップ</button><button type="button" class="btn" data-act="next"'+(S.sel==null?' disabled':'')+'>'+(S.idx===S.items.length-1?'結果を見る':'次へ')+'</button></div></div>'}
+function spanCard(it){
+  const sp=S.span||{phase:'ready'};const dirTxt=it.dir==='f'?'表示された順番どおり':'表示されたのと逆の順番';
+  if(sp.phase==='ready')return'<div class="card"><div class="dom">'+DOM.mem+'</div><p class="qtext">'+it.seq.length+'桁の数字が1つずつ表示されます。<br>すべて消えたら <b>'+dirTxt+'</b> に入力してください。</p><div class="center"><button type="button" class="btn" data-act="span-start">表示を始める</button></div></div>';
+  if(sp.phase==='show')return'<div class="card"><div class="dom">'+DOM.mem+'</div><p class="qtext center muted">覚えてください（'+dirTxt+'）</p><div class="digit" id="digit"></div></div>';
+  return'<div class="card"><div class="dom">'+DOM.mem+'</div><p class="qtext"><b>'+dirTxt+'</b> に入力してください（'+it.seq.length+'桁）</p><input id="spanin" class="spanin" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="12" placeholder="数字を入力"><div class="nav"><span></span><button type="button" class="btn" data-act="span-submit">決定</button></div></div>';
+}
+function focusSpan(){const inp=document.getElementById('spanin');if(inp)inp.focus()}
+function spanStart(it){
+  S.span={phase:'show'};render();let t=500;
+  it.seq.forEach(d=>{spanTimers.push(setTimeout(()=>{const el=document.getElementById('digit');if(el)el.textContent=d},t));t+=850;spanTimers.push(setTimeout(()=>{const el=document.getElementById('digit');if(el)el.textContent=''},t));t+=250});
+  spanTimers.push(setTimeout(()=>{S.span={phase:'input'};render()},t+150));
+}
+function spanCheck(it){const inp=document.getElementById('spanin');const val=(inp?inp.value:'').replace(/\D/g,'');const exp=(it.dir==='f'?it.seq:it.seq.slice().reverse()).join('');return{u:val===exp,val:val}}
+function record(u,sel){const it=S.items[S.idx];S.answers[it.id]={u:u?1:0,sel:sel,t:Math.round((Date.now()-S.qStart)/100)/10}}
+function next(){S.idx++;S.sel=null;S.span=null;S.qStart=Date.now();if(S.idx>=S.items.length)return finish();S.intro=S.items[S.idx].dom!==S.items[S.idx-1].dom;render();window.scrollTo(0,0)}
+function finish(){
+  clearTimers();const res=score(S.items,S.answers);const used=Math.round((Date.now()-S.start)/1000);
+  const d=store.get();d.hist=(d.hist||[]).concat([{date:new Date().toLocaleDateString('ja-JP'),mode:S.mode,iq:res.iq}]).slice(-30);store.set(d);
+  const items=S.items,answers=S.answers,mode=S.mode;
+  go('result',{res:res,used:used,items:items,answers:answers,mode:mode,rank:null});
+  send({kind:'test',uid:anonId(),device:device(),mode:mode,iq:res.iq,ci:res.ci,correct:res.correct,total:res.total,used:used,
+    idx:{pr:res.idx.pr&&res.idx.pr.iq,vc:res.idx.vc&&res.idx.vc.iq,ql:res.idx.ql&&res.idx.ql.iq,wm:res.idx.wm&&res.idx.wm.iq},
+    details:items.map(it=>{const a=answers[it.id];return{id:it.id,dom:it.dom,lvl:it.iq,p:it.p,u:a&&a.u?1:0,ans:a?1:0,t:a?a.t:null}})},
+    r=>{if(S.screen!=='result'&&S.screen!=='review')return;S.rank=r;const el=document.getElementById('rank');if(el)el.innerHTML=rankHTML(r)});
+}
+function rankHTML(r){if(!r||!r.n)return'';return'参加者 <b>'+r.n.toLocaleString()+'</b> 人中 <b>'+r.rank.toLocaleString()+'</b> 位（'+MODE_NAME[S.mode]+'・平均IQ '+r.avg+'）'}
+
+/* ---------- result ---------- */
+function domStats(){return Object.keys(DOM).map(k=>{const its=S.items.filter(x=>x.dom===k);if(!its.length)return null;const c=its.filter(x=>S.answers[x.id]&&S.answers[x.id].u).length;return{k:k,name:DOM[k],c:c,t:its.length}}).filter(Boolean)}
+function result(){
+  const r=S.res;const ds=domStats();const isPC=window.innerWidth>=960;
+  const idxHTML=Object.keys(INDEX_NAME).map(k=>{const v=r.idx[k];if(!v)return'';const w=Math.max(4,Math.min(100,(v.iq-55)/90*100));return'<div class="irow"><span class="iname">'+INDEX_NAME[k]+'</span><div class="bar big"><i style="width:'+w+'%"></i></div><b class="inum">'+v.iq+'</b></div>'}).join('');
+  app.innerHTML='<div class="wrap">'+head('home','ホーム')+
+  '<div class="card rcard"><div class="rlabel">'+MODE_NAME[S.mode]+'の結果　推定IQ</div><div class="iq">'+r.iq+'</div><div class="ci">90%信頼区間 '+(r.iq-r.ci)+'〜'+(r.iq+r.ci)+'</div><div class="cls">'+classify(r.iq)+'</div><div class="pct">'+rarity(r.pct)+'</div><div class="meta">正答 '+r.correct+' / '+r.total+'　所要時間 '+fmt(S.used)+'</div>'+(ONLINE?'<div class="meta" id="rank">'+(S.rank?rankHTML(S.rank):'みんなの結果と比べています…')+'</div>':'')+'</div>'+
+  '<div class="grid2"><div class="card"><h3>4つの指標</h3>'+idxHTML+'<p class="note">平均100・標準偏差15のスケール（WAISと同じ）。</p></div><div class="card"><h3>分野別の正答率</h3>'+radarSVG(ds.map(d=>d.c/d.t),ds.map(d=>d.name))+'</div></div>'+
+  (isPC?'<div class="card"><h3>分野別の内訳</h3><table class="tbl"><tr><th>分野</th><th>正答</th><th>正答率</th><th>最も難しかった正解</th></tr>'+ds.map(d=>{const best=S.items.filter(x=>x.dom===d.k&&S.answers[x.id]&&S.answers[x.id].u).sort((a,b)=>b.iq-a.iq)[0];return'<tr><td>'+d.name+'</td><td>'+d.c+'/'+d.t+'</td><td>'+Math.round(d.c/d.t*100)+'%</td><td>'+(best?'IQ '+best.iq+'レベル':'—')+'</td></tr>'}).join('')+'</table></div>':'')+
+  '<div class="actions"><button type="button" class="btn" data-act="share">結果を共有</button><button type="button" class="btn sec" data-go="review">解答と解説</button><button type="button" class="btn sec" data-start="'+S.mode+'">もう一度</button></div>'+
+  '<p class="note">推定値です。臨床用に標準化された検査ではないため、医学的・教育的な判定には使えません。同じ問題を繰り返すと練習効果で高く出ます。</p></div>';
+}
+function shareText(){const r=S.res;const idx=Object.keys(INDEX_NAME).filter(k=>r.idx[k]).map(k=>INDEX_NAME[k]+' '+r.idx[k].iq).join('／');return'🧠 IQ Lab｜'+MODE_NAME[S.mode]+'\n推定IQ '+r.iq+'（'+rarity(r.pct)+'）\n'+idx+'\n挑戦はこちら → '+appUrl()}
+async function share(text){
+  try{await navigator.clipboard.writeText(text);toast('結果をコピーしました');return}catch(e){}
+  const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('結果をコピーしました')}catch(e){toast('コピーできませんでした')}ta.remove();
+}
+
+/* ---------- review ---------- */
+function review(){
+  app.innerHTML='<div class="wrap">'+head('result','結果に戻る')+'<h2>解答と解説</h2><p class="lead">各問題の「IQ◯◯レベル」は、その問題を50%の確率で解ける人の推定IQです。</p>'+
+  S.items.map(it=>{const a=S.answers[it.id];const ok=!!(a&&a.u);
+    let body;
+    if(it.type==='span')body='<p class="qtext small">'+(it.dir==='f'?'順唱':'逆唱')+' '+it.seq.length+'桁：'+it.seq.join(' ')+'</p><p class="exp">正解は '+(it.dir==='f'?it.seq:it.seq.slice().reverse()).join('')+(a&&a.val?'　あなたの入力：'+esc(a.val):'')+'</p>';
+    else body='<p class="qtext small">'+esc(it.q)+'</p>'+stimHTML(it.stim)+'<div class="ans"><div><div class="al">正解</div>'+optHTML(it,it.opts[it.ans])+'</div>'+(a&&a.sel!=null&&!ok?'<div><div class="al">あなたの回答</div>'+optHTML(it,it.opts[a.sel])+'</div>':'')+'</div><p class="exp">'+esc(it.exp||'')+'</p>';
+    return'<div class="card rv '+(ok?'ok':'ng')+'"><div class="rvh"><span class="dom">'+DOM[it.dom]+'</span><span class="mark">'+(ok?'○ 正解':(a?'× 不正解':'× 未回答'))+'</span><span class="lvl2">IQ '+it.iq+'レベル</span></div>'+body+'</div>'}).join('')+
+  '<div class="actions"><button type="button" class="btn sec" data-go="result">結果に戻る</button><button type="button" class="btn sec" data-go="home">ホーム</button></div></div>';
+}
+
+/* ---------- single challenge ---------- */
+const BANDS=[['all','ランダム'],['b1','〜IQ109'],['b2','IQ110〜119'],['b3','IQ120〜129'],['b4','IQ130以上']];
+const remainingS=()=>S.limit-(Date.now()-S.start)/1000;
+function single(){
+  const lv=S.level||'all';
+  if(!S.item){app.innerHTML='<div class="wrap">'+head('home','ホーム')+'<h1>一発チャレンジ</h1><p class="lead">1問だけ。制限時間内に解けたら、その問題のIQレベルをクリア。レベルを選んで挑戦。</p><div class="bands">'+BANDS.map(b=>'<button type="button" class="opt band'+(lv===b[0]?' sel':'')+'" data-level="'+b[0]+'">'+b[1]+'</button>').join('')+'</div><div class="center"><button type="button" class="btn" data-act="single-draw">問題を出す</button></div><p class="note">IQレベル＝その問題を50%の確率で解ける人の推定IQ（IRTの難易度パラメータから換算）。</p></div>';return}
+  const it=S.item;
+  const body=it.type==='span'?'<div class="lvl" style="margin:0 0 8px">この問題は IQ '+it.iq+' レベル</div>'+spanCard(it):'<div class="card"><div class="dom">'+DOM[it.dom]+'</div><span class="lvl">この問題は IQ '+it.iq+' レベル</span><p class="qtext">'+esc(it.q)+'</p>'+stimHTML(it.stim)+optsHTML(it,S.sel)+'<div class="nav"><button type="button" class="btn sec" data-act="single-giveup">わからない</button><button type="button" class="btn" data-act="single-answer"'+(S.sel==null?' disabled':'')+'>回答する</button></div></div>';
+  app.innerHTML='<div class="wrap"><div class="thead"><span>一発チャレンジ</span><span class="timer" id="timer">'+(it.type==='span'?'':fmt(remainingS()))+'</span></div><div class="bar"><i id="sbar" style="width:'+(it.type==='span'?0:100)+'%"></i></div><div style="height:14px"></div>'+body+'</div>';
+  focusSpan();
+}
+function singleDraw(){
+  const seen=S.seen||[];const lv=S.level||'all';
+  const pool=BANK.filter(it=>lv==='all'||bandOf(it.iq)===lv);
+  let fresh=pool.filter(it=>!seen.includes(it.id));if(!fresh.length){fresh=pool;seen.length=0}
+  const it=fresh[Math.floor(Math.random()*fresh.length)];const limit=LIMITS[it.dom]||90;
+  Object.assign(S,{item:it,sel:null,span:null,limit:limit,start:Date.now(),seen:seen.concat([it.id])});render();window.scrollTo(0,0);
+  if(it.type!=='span')tick=setInterval(()=>{const r=remainingS();const el=document.getElementById('timer');if(el){el.textContent=fmt(r);el.classList.toggle('low',r<15)}const b=document.getElementById('sbar');if(b)b.style.width=Math.max(0,r/S.limit*100)+'%';if(r<=0)singleFinish(false,null,true)},250);
+}
+function singleFinish(ok,sel,timeout,val){const it=S.item;const used=Math.round((Date.now()-S.start)/1000);go('sresult',{item:it,ok:ok,sel:sel,timeout:timeout,val:val,level:S.level,seen:S.seen,used:used,stat:null});
+  send({kind:'single',uid:anonId(),device:device(),id:it.id,dom:it.dom,lvl:it.iq,p:it.p,u:ok?1:0,used:used,timeout:timeout?1:0},
+    r=>{if(S.screen!=='sresult'||S.item!==it)return;S.stat=r;const el=document.getElementById('istat');if(el)el.innerHTML=statHTML(r)})}
+function statHTML(r){if(!r||!r.n)return'';return'みんなの正解率 <b>'+Math.round(r.rate*100)+'%</b>（'+r.n.toLocaleString()+'人が挑戦）'}
+function sresult(){
+  const it=S.item;const ok=S.ok;
+  let detail;
+  if(it.type==='span')detail='<p class="exp">正解は '+(it.dir==='f'?it.seq:it.seq.slice().reverse()).join('')+(S.val?'　あなたの入力：'+esc(S.val):'')+'</p>';
+  else detail='<div class="ans"><div><div class="al">正解</div>'+optHTML(it,it.opts[it.ans])+'</div>'+(S.sel!=null&&!ok?'<div><div class="al">あなたの回答</div>'+optHTML(it,it.opts[S.sel])+'</div>':'')+'</div><p class="exp">'+esc(it.exp||'')+'</p>';
+  app.innerHTML='<div class="wrap">'+head('home','ホーム')+'<div class="card"><div class="verdict '+(ok?'ok':'ng')+'">'+(ok?'正解！':(S.timeout?'時間切れ':'不正解'))+'</div><p class="center" style="font-weight:700;font-size:18px">'+(ok?'IQ '+it.iq+' レベルの問題をクリア':'この問題は IQ '+it.iq+' レベル')+'</p><p class="center muted" style="font-size:13px">'+DOM[it.dom]+'　所要 '+S.used+'秒</p>'+(ONLINE?'<p class="center muted" style="font-size:13px" id="istat">'+(S.stat?statHTML(S.stat):'')+'</p>':'')+detail+'</div>'+
+  '<div class="actions">'+(ok?'<button type="button" class="btn" data-act="sshare">結果を共有</button>':'')+'<button type="button" class="btn'+(ok?' sec':'')+'" data-act="single-next">次の問題</button><button type="button" class="btn sec" data-go="single">レベルを変える</button></div></div>';
+}
+function singleShareText(){return'🧠 IQ Lab 一発チャレンジ\nIQ '+S.item.iq+' レベルの問題（'+DOM[S.item.dom]+'）を '+S.used+'秒でクリア！\n挑戦はこちら → '+appUrl()}
+
+/* ---------- method ---------- */
+function method(){
+  app.innerHTML='<div class="wrap">'+head('home','ホーム')+'<h2>採点の仕組みと問題の出典</h2>'+
+  '<div class="card"><h3>問題形式の元になった検査・研究</h3><ul class="src">'+
+  '<li><b>行列推理</b>：Raven\'s Progressive Matrices（1938〜）、WAIS 行列推理、Cattell Culture Fair Test と同形式。流動性知能（g因子）の測定に最も広く使われる形式。</li>'+
+  '<li><b>図形系列</b>：Cattell Culture Fair Test「系列」と同形式。</li>'+
+  '<li><b>空間認識</b>：心的回転（Shepard & Metzler, 1971）の2次元版、紙折りテスト（ETS Paper Folding Test）、積み木数え。</li>'+
+  '<li><b>数的推理</b>：多くの知能検査やメンサ系テストで使われる数列補完。</li>'+
+  '<li><b>言語理解</b>：WAIS「類似」「語彙」、類推（A：B＝C：？）形式。結晶性知能の測定。</li>'+
+  '<li><b>算数推理</b>：WAIS「算数」、認知反射テスト CRT（Frederick, 2005）。</li>'+
+  '<li><b>論理推理</b>：三段論法、Wason選択課題（1966）、騎士と悪党パズル（Smullyan）。</li>'+
+  '<li><b>作動記憶</b>：WAIS「数唱」（順唱・逆唱）と同じ手順。1秒に1桁ずつ提示。</li></ul>'+
+  '<p class="note">著作権のある検査問題そのものは使用していません。形式・出題理論のみを参照して作成したオリジナル問題です。</p></div>'+
+  '<div class="card"><h3>推定方法</h3><p>各問題に難易度（b）・識別力（a）・当て推量（c）を設定した3パラメータ・ロジスティックモデル（3PL IRT）を使い、回答パターンから能力値θをEAP（事後期待値）で推定します。IQ = 100 + 15θ（平均100・標準偏差15、WAISと同じスケール）。</p><p>難易度は一般成人の推定正答率から換算した値で、大規模な標準化データによるものではありません。問題数が少ないほど信頼区間は広がります。一発チャレンジの「IQ◯◯レベル」は、その問題を50%の確率で解ける人のIQ（b）です。</p></div>'+
+  '<div class="card"><h3>IQの分類（WAIS-IV の記述分類に準拠）</h3><table class="tbl"><tr><th>IQ</th><th>分類</th><th>人口に占める割合</th></tr><tr><td>130以上</td><td>非常に高い</td><td>約2.3%</td></tr><tr><td>120〜129</td><td>高い</td><td>約6.7%</td></tr><tr><td>110〜119</td><td>平均の上</td><td>約16%</td></tr><tr><td>90〜109</td><td>平均</td><td>約50%</td></tr><tr><td>80〜89</td><td>平均の下</td><td>約16%</td></tr><tr><td>70〜79</td><td>低い</td><td>約6.7%</td></tr><tr><td>69以下</td><td>非常に低い</td><td>約2.3%</td></tr></table></div>'+
+  '<div class="card"><h3>結果の読み方・注意</h3><p>同じ問題を繰り返すと練習効果で高く出ます。体調・集中・時間帯でも変動します。本テストは娯楽・教養目的であり、医学的・教育的な判定、就職・入学などの判断には使えません。</p></div></div>';
+}
+
+/* ---------- events ---------- */
+app.addEventListener('click',e=>{
+  const b=e.target.closest('[data-go],[data-start],[data-act],[data-opt],[data-level]');if(!b)return;
+  if(b.dataset.go){const g=b.dataset.go;
+    if(g==='review')return go('review',{items:S.items,answers:S.answers,res:S.res,mode:S.mode,used:S.used,rank:S.rank});
+    if(g==='result')return go('result',{items:S.items,answers:S.answers,res:S.res,mode:S.mode,used:S.used,rank:S.rank});
+    if(g==='single')return go('single',{level:S.level||'all',seen:S.seen||[]});
+    return go(g)}
+  if(b.dataset.start)return startTest(b.dataset.start);
+  if(b.dataset.level){S.level=b.dataset.level;return render()}
+  if(b.dataset.opt!=null){S.sel=+b.dataset.opt;app.querySelectorAll('.opt[data-opt]').forEach(x=>x.classList.toggle('sel',+x.dataset.opt===S.sel));const nb=app.querySelector('[data-act="next"],[data-act="single-answer"]');if(nb)nb.disabled=false;return}
+  const act=b.dataset.act;const it=S.screen==='test'?S.items[S.idx]:S.item;
+  if(act==='intro'){S.intro=false;S.qStart=Date.now();return render()}
+  if(act==='skip'){record(false,null);return next()}
+  if(act==='next'){if(S.sel==null)return;record(S.sel===it.ans,S.sel);return next()}
+  if(act==='span-start')return spanStart(it);
+  if(act==='span-submit'){const c=spanCheck(it);if(S.screen==='test'){record(c.u,null);S.answers[it.id].val=c.val;return next()}return singleFinish(c.u,null,false,c.val)}
+  if(act==='share')return share(shareText());
+  if(act==='sshare')return share(singleShareText());
+  if(act==='single-draw')return singleDraw();
+  if(act==='single-answer'){if(S.sel==null)return;return singleFinish(S.sel===it.ans,S.sel,false)}
+  if(act==='single-giveup')return singleFinish(false,null,false);
+  if(act==='single-next'){go('single',{level:S.level,seen:S.seen});return singleDraw()}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target&&e.target.tagName==='INPUT'){if(e.key==='Enter'){const b=app.querySelector('[data-act="span-submit"]');if(b)b.click()}return}
+  if(S.screen!=='test'&&S.screen!=='single')return;
+  if(/^[1-9]$/.test(e.key)){const b=app.querySelector('[data-opt="'+(+e.key-1)+'"]');if(b)b.click()}
+  else if(e.key==='Enter'){const b=app.querySelector('[data-act="next"],[data-act="single-answer"],[data-act="intro"],[data-act="span-start"],[data-act="single-draw"]');if(b&&!b.disabled)b.click()}
+  else if(e.key==='s'||e.key==='S'){const b=app.querySelector('[data-act="skip"]');if(b)b.click()}
+});
+render();
+})();
+</script>
+
+</body>
+</html>
