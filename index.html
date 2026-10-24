@@ -429,6 +429,209 @@ const EXTRA=[
 {id:'L18',dom:'log',p:.4,q:'3人のうち、正直者は本当のことだけ、嘘つきは嘘だけを言います。\nA「Bは嘘つきだ」\nB「Cは嘘つきだ」\nC「AもBも嘘つきだ」\n正直者は誰？',opts:['Bだけ','Aだけ','Cだけ','AとC','判断できない'],exp:'Cが正直ならAとBは嘘つき→Bの「Cは嘘つき」が嘘でCは正直…だがAが嘘つきならBは正直になり矛盾。よってCは嘘つき→Bは正直→Aは嘘つき。'}
 ];
 EXTRA.forEach(x=>RAW.push(Object.assign({extra:true},x)));
+
+/* ===== 大量追加：ルールから自動生成（固定シードなので毎回同じ問題・同じID） ===== */
+const GEN=(function(){
+const R=mulberry32(20261024);
+const ri=(a,b)=>a+Math.floor(R()*(b-a+1));
+const pick=a=>a[Math.floor(R()*a.length)];
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a};
+const out=[];const cnt={};
+const nid=p=>{cnt[p]=(cnt[p]||0)+1;return p+String(cnt[p]).padStart(3,'0')};
+const r1=x=>Math.round(x*10)/10;
+const yen=x=>x.toLocaleString('ja-JP')+'円';
+function numOpts(ans,cands,fmt,minv){fmt=fmt||(x=>String(x));const m=minv==null?0:minv;const s=[ans];
+  const st=Math.abs(ans)>=1000?100:Math.abs(ans)>=200?10:1;cands.concat([ans+st,ans-st,ans+2*st,ans-2*st,ans+3*st,ans-3*st,ans+5*st,ans+10*st]).forEach(x=>{x=r1(x);if(s.length<5&&Number.isFinite(x)&&x>=m&&!s.includes(x))s.push(x)});return s.map(fmt)}
+function textOpts(ans,ds){const s=[ans];ds.forEach(d=>{if(s.length<5&&!s.includes(d))s.push(d)});return s}
+
+/* ---------- 数的推理：10パターン×8問 ---------- */
+const addN=(seq,ans,cands,p,exp)=>out.push({id:nid('GN'),dom:'num',p:p,q:QN,stim:{kind:'seq',text:seq.join(',  ')+',  ?'},opts:numOpts(ans,cands),exp:exp});
+for(let i=0;i<8;i++){
+  {let a=ri(2,30),d=ri(3,13);if(R()<.3){d=-d;a=ri(80,130)}const s=[0,1,2,3,4].map(k=>a+k*d),ans=a+5*d;
+   addN(s,ans,[ans+d,a+6*d,ans-2*d],.78,'毎回'+(d>0?d+'ずつ増える':(-d)+'ずつ減る')+'。次は'+ans+'。')}
+  {const r=pick([2,3,4]),n=r===4?4:5,a=r===4?ri(1,3):ri(1,6);const s=[];for(let k=0;k<n;k++)s.push(a*Math.pow(r,k));const ans=a*Math.pow(r,n),last=s[n-1];
+   addN(s,ans,[last+(last-s[n-2]),last*(r+1),ans/r*(r-1)+last],.7,'前の数を'+r+'倍。'+last+'×'+r+'＝'+ans+'。')}
+  {const a=ri(1,20),d0=ri(1,5),inc=ri(1,3);const s=[a];for(let k=0;k<5;k++)s.push(s[k]+d0+k*inc);const ans=s[5]+d0+5*inc;
+   addN(s,ans,[s[5]+d0+4*inc,ans+inc,ans-inc],.62,'差が'+d0+'から'+inc+'ずつ増える（'+[0,1,2,3,4].map(k=>d0+k*inc).join(',')+'…）。次の差は'+(d0+5*inc)+'で'+ans+'。')}
+  {const t=ri(0,3);let s=[],ans,exp;
+   if(t===0){const p=ri(4,9),q=ri(1,p-1);s=[ri(1,9)];for(let k=0;k<6;k++)s.push(k%2?s[k]-q:s[k]+p);ans=s[6]+p;exp='+'+p+'と−'+q+'の繰り返し。'}
+   else if(t===1){const c=ri(1,4);s=[ri(1,4)];for(let k=0;k<6;k++)s.push(k%2?s[k]+c:s[k]*2);ans=s[6]*2;exp='×2と+'+c+'の繰り返し。'}
+   else if(t===2){const c=ri(1,3);s=[ri(2,5)];for(let k=0;k<5;k++)s.push(k%2?s[k]-c:s[k]*3);ans=s[5]*3;exp='×3と−'+c+'の繰り返し。'}
+   else{const p=ri(2,6);s=[ri(1,5)];for(let k=0;k<6;k++)s.push(k%2?s[k]*2:s[k]+p);ans=s[6]+p;exp='+'+p+'と×2の繰り返し。'}
+   addN(s,ans,[ans+1,s[s.length-1]*2,s[s.length-1]-1],.55,exp+'次は'+ans+'。')}
+  {const a=ri(1,15),d1=ri(2,6),b=ri(20,40),d2=-ri(1,4);const A=k=>a+k*d1,B=k=>b+k*d2;const s=[A(0),B(0),A(1),B(1),A(2),B(2),A(3)];const ans=B(3);
+   addN(s,ans,[A(4),B(2)-d2*2,ans-1],.52,'1つおきに見ると、'+d1+'ずつ増える列と'+(-d2)+'ずつ減る列の2本。次は減る列の'+ans+'。')}
+  {const cube=R()<.3,s0=cube?1:ri(1,5),k=ri(-2,5);const f=n=>(cube?n*n*n:n*n)+k;const s=[0,1,2,3,4].map(j=>f(s0+j));const ans=f(s0+5);
+   addN(s,ans,[ans+2*(s0+5),f(s0+5)-k+(k>0?0:2),s[4]+(s[4]-s[3])],.5,(cube?'n³':'n²')+(k?((k>0?'+':'')+k):'')+'の並び（n＝'+s0+'から）。次は'+ans+'。')}
+  {const k=pick([2,3]),c=pick([-1,1,2,3]);const s=[ri(1,4)];for(let j=0;j<4;j++)s.push(s[j]*k+c);const ans=s[4]*k+c;
+   addN(s,ans,[s[4]*k,s[4]*k+c+1,s[4]+(s[4]-s[3])*k],.5,'前の数×'+k+(c>0?'+'+c:'−'+(-c))+'。'+s[4]+'×'+k+(c>0?'+'+c:'−'+(-c))+'＝'+ans+'。')}
+  {const a=ri(1,6),b=ri(a,a+6);const s=[a,b];for(let j=0;j<5;j++)s.push(s[j]+s[j+1]);const ans=s[5]+s[6];
+   addN(s,ans,[s[6]+(s[6]-s[5]),ans-1,s[6]*2],.6,'前の2つの和。'+s[5]+'+'+s[6]+'＝'+ans+'。')}
+  {const a=ri(1,10),m=ri(1,3);const s=[a];for(let j=0;j<5;j++)s.push(s[j]+m*Math.pow(2,j));const ans=s[5]+m*32;
+   addN(s,ans,[s[5]+m*16,s[5]+m*24,ans-m],.5,'差が'+[0,1,2,3,4].map(j=>m*Math.pow(2,j)).join(',')+'と倍々に増える。次の差は'+(m*32)+'で'+ans+'。')}
+  {const s0=ri(1,3),k=ri(1,3);const f=n=>n*(n+k);const s=[0,1,2,3,4].map(j=>f(s0+j));const ans=f(s0+5);
+   addN(s,ans,[s[4]+(s[4]-s[3]),ans+2,(s0+5)*(s0+5)],.45,'n×(n+'+k+')の並び（'+s0+'×'+(s0+k)+'から）。'+(s0+5)+'×'+(s0+5+k)+'＝'+ans+'。')}
+}
+
+/* ---------- 算数推理：10パターン×7問 ---------- */
+const addA=(q,ans,cands,fmt,p,exp,minv)=>out.push({id:nid('GA'),dom:'ari',p:p,q:q,opts:numOpts(ans,cands,fmt,minv),exp:exp});
+const SPD=[];[30,36,42,48,54,60,72,84,90].forEach(s=>[10,15,20,25,40,45,50].forEach(m=>{if(s*m%60===0)SPD.push([s,m])}));
+const WORK=[[3,6],[4,12],[6,12],[10,15],[12,24],[5,20],[20,30],[8,24],[6,30],[12,60]];
+const SALT=[];[100,150,200,300,400].forEach(w=>[50,100,200,300].forEach(v=>{for(let c=5;c<=20;c++)if((c*w)%(w+v)===0)SALT.push([c,w,v])}));
+const ANI=[['鶴','亀','匹',2,4,'足','います'],['自転車','三輪車','台',2,3,'車輪','あります'],['バイク','自動車','台',2,4,'タイヤ','あります'],['タコ','イカ','匹',8,10,'足','います']];
+for(let i=0;i<7;i++){
+  {const P=ri(12,60)*100,off=pick([10,20,25,30,40]),ans=P*(100-off)/100;
+   addA('定価'+yen(P)+'の商品が'+off+'%引き。いくらで買える？',ans,[P*off/100,P-off*10,ans+P/10],yen,.76,P.toLocaleString()+'×'+(100-off)/100+'＝'+yen(ans)+'。')}
+  {const P=ri(12,60)*100,off=pick([10,20,30,40]),ans=Math.round(P*(100-off)/100*1.1);
+   addA('定価'+yen(P)+'の商品が'+off+'%引き。さらに消費税10%がかかります。支払う金額は？',ans,[P*(100-off)/100,Math.round(P*(100-off+10)/100),Math.round(P*1.1)-P*off/100],yen,.62,yen(P*(100-off)/100)+'に1.1を掛けて'+yen(ans)+'。')}
+  {const sm=pick(SPD),d=sm[0]*sm[1]/60;
+   addA('時速'+sm[0]+'kmで'+sm[1]+'分間進むと、何km進む？',d,[sm[0]*sm[1]/100,d*2,sm[0]/sm[1]*10],x=>x+'km',.58,'時速'+sm[0]+'km＝分速'+r1(sm[0]/60)+'km。'+sm[1]+'分で'+d+'km。')}
+  {const w=pick(WORK),ans=w[0]*w[1]/(w[0]+w[1]);
+   addA('ある仕事を、Aさん1人なら'+w[0]+'時間、Bさん1人なら'+w[1]+'時間で終えます。2人で同時にすると何時間？',ans,[(w[0]+w[1])/2,w[1]-w[0],ans+1],x=>x+'時間',.48,'1時間でAは1/'+w[0]+'、Bは1/'+w[1]+'進む。合わせて1/'+ans+'なので'+ans+'時間。')}
+  {let n,x,y,ans;do{n=ri(3,7);x=ri(55,80);y=x+pick([1,2,3,-1,-2]);ans=(n+1)*y-n*x}while(ans<0||ans>100);
+   addA(n+'人のテストの平均点は'+x+'点でした。1人加わると平均点が'+y+'点になりました。加わった人は何点？',ans,[y,2*y-x,ans+(y-x)],v=>v+'点',.5,'合計'+n*x+'点→'+(n+1)+'人で'+(n+1)*y+'点。差の'+ans+'点。')}
+  {const sw=pick(SALT),ans=sw[0]*sw[1]/(sw[1]+sw[2]);
+   addA(sw[0]+'%の食塩水'+sw[1]+'gに水を'+sw[2]+'g加えると、濃度は何%になる？',ans,[sw[0]/2,sw[0]-sw[2]/10,ans*2],v=>v+'%',.5,'食塩は'+sw[0]*sw[1]/100+'g。'+(sw[0]*sw[1]/100)+'÷'+(sw[1]+sw[2])+'＝'+ans+'%。',1)}
+  {const an=pick(ANI),n=ri(8,20),t=ri(2,n-2),L=an[3]*(n-t)+an[4]*t;
+   addA(an[0]+'と'+an[1]+'があわせて'+n+an[2]+an[6]+'。'+an[5]+'の数は全部で'+L+'本です。'+an[1]+'はいくつ？',t,[n-t,Math.round(L/an[4]),t+2],v=>v+an[2],.55,'全部'+an[0]+'なら'+an[3]*n+'本。'+(L-an[3]*n)+'本多いのは'+an[1]+'1つにつき'+(an[4]-an[3])+'本多いから、'+t+an[2]+'。')}
+  {const d=pick([5,10,20,25,50]),k=ri(6,20),L=d*k,circ=R()<.4;
+   if(circ)addA('周りの長さ'+L+'mの池のまわりに、'+d+'mおきに木を植えます。木は何本必要？',k,[k+1,k-1,k+2],v=>v+'本',.5,'池のように一周する場合は「間の数＝木の数」。'+L+'÷'+d+'＝'+k+'本。');
+   else addA('長さ'+L+'mの道に、端から端まで'+d+'mおきに木を植えます。両端にも植えると、木は何本必要？',k+1,[k,k+2,k-1],v=>v+'本',.6,'間の数は'+L+'÷'+d+'＝'+k+'。両端にも植えるので'+(k+1)+'本。')}
+  {let C,k,y,P;do{C=ri(4,12);k=pick([2,3,4]);y=ri(2,15);P=k*(C+y)-y}while(P-C<20||P>60);
+   addA('父は'+P+'歳、子どもは'+C+'歳です。父の年齢が子どもの年齢のちょうど'+k+'倍になるのは何年後？',y,[Math.round(P/k)-C,y+1,y-1],v=>v+'年後',.5,y+'年後は父'+(P+y)+'歳、子'+(C+y)+'歳で'+k+'倍。',1)}
+  {const N=ri(4,40)*10,pct=pick([10,20,25,30,40,60,75]),M=N*pct/100;if(!Number.isInteger(M)){i--;continue}
+   addA('ある数の'+pct+'%が'+M+'です。ある数は？',N,[M*pct/100,M+pct,N/2,N*2],v=>String(v),.62,M+'÷'+pct/100+'＝'+N+'。')}
+}
+for(let i=0;i<7;i++){const h=ri(1,11),m=pick([10,20,30,40,50]);let a=Math.abs(30*h-5.5*m);if(a>180)a=360-a;let w=Math.abs(30*h-6*m);if(w>180)w=360-w;
+  addA('時計が'+h+'時'+m+'分を指しています。長針と短針がつくる小さいほうの角度は？',a,[w,a+5,a-5,a+10],v=>v+'°',.4,'長針は'+6*m+'°の位置。短針は'+h+'時の位置から'+m+'分で'+0.5*m+'°進み'+(30*h+0.5*m)+'°。差は'+a+'°。')}
+
+/* ---------- 論理推理（自動生成） ---------- */
+const WD=['日','月','火','水','木','金','土'];
+for(let i=0;i<8;i++){const names=shuf(['A','B','C','D','E']).slice(0,i<4?4:5);const cl=[];for(let j=0;j<names.length-1;j++)cl.push(R()<.5?names[j]+'は'+names[j+1]+'より背が高い':names[j+1]+'は'+names[j]+'より背が低い');
+  const k=ri(2,names.length-1);const ans=names[k-1];
+  out.push({id:nid('GL'),dom:'log',p:names.length===4?.66:.56,q:shuf(cl).join('。\n')+'。\n背が高いほうから'+k+'番目は？',opts:textOpts(ans,shuf(names.filter(x=>x!==ans)).concat(['判断できない'])).slice(0,5),exp:'高い順に並べると '+names.join('＞')+'。'+k+'番目は'+ans+'。'})}
+const DX=[['明日',1],['明後日',2],['昨日',-1],['おととい',-2],['3日後',3],['3日前',-3],['4日後',4]];
+for(let i=0;i<8;i++){let a,b;do{a=pick(DX);b=pick(DX)}while(a[0]===b[0]||a[1]+b[1]===0);const t=ri(0,6),tgt=((t+a[1]+b[1])%7+7)%7;
+  out.push({id:nid('GL'),dom:'log',p:.56,q:'「'+a[0]+'の'+b[0]+'」が'+WD[tgt]+'曜日です。今日は何曜日？',opts:textOpts(WD[t]+'曜日',shuf([1,2,3,4,5,6]).map(o=>WD[(t+o)%7]+'曜日')),exp:'「'+a[0]+'の'+b[0]+'」は今日から'+((a[1]+b[1])>0?(a[1]+b[1])+'日後':(-(a[1]+b[1]))+'日前')+'。だから今日は'+WD[t]+'曜日。'})}
+for(let i=0;i<6;i++){const T=ri(30,45),both=ri(3,12),na=ri(5,15),nb=ri(5,15),nei=T-both-na-nb;if(nei<1){i--;continue}const A=na+both,B=nb+both;const SUB=pick([['犬','猫','飼っている'],['英語','中国語','話せる'],['野球','サッカー','好きな'],['電車','バス','使って通学している']]);
+  out.push({id:nid('GL'),dom:'log',p:.5,q:T+'人のうち、'+SUB[0]+'を'+SUB[2]+'人が'+A+'人、'+SUB[1]+'を'+SUB[2]+'人が'+B+'人、どちらでもない人が'+nei+'人です。両方の人は何人？',opts:numOpts(both,[A+B-T,T-A-B+both+nei,both+5,Math.abs(A-B)],v=>v+'人'),exp:'どちらかに当てはまる人は'+T+'−'+nei+'＝'+(T-nei)+'人。'+A+'+'+B+'−'+(T-nei)+'＝'+both+'人が重なっている。'})}
+
+/* ---------- 行列推理（自動生成）8パターン×6問 ---------- */
+const SH=['cir','sq','tri','dia','hex','pent','star'],FL=['n','h','f'],ZS=['s','m','l'],CO=['TL','TR','BR','BL'],SEGS=['T','B','L','R','D1','D2','H','V'];
+const ckey=o=>key(o);
+function addM(cells,ans,ds,p,exp){const o=[ans];const ks=[ckey(ans)];ds.forEach(d=>{const k=ckey(d);if(o.length<6&&!ks.includes(k)){o.push(d);ks.push(k)}});if(o.length<5)return false;out.push({id:nid('GM'),dom:'mat',p:p,a:1.2,q:QM,stim:{kind:'matrix',cells:cells},opts:o,exp:exp});return true}
+const sub=(arr,n)=>shuf(arr).slice(0,n);
+const SG=(a)=>SEG(a.length?a:['H']);
+let guard=0;
+for(let i=0;i<6;i++){
+  {const s=sub(SH,3),f=shuf(FL),dir=pick([1,2]);const cell=(r,c)=>C(s[(r+dir*c)%3],f[c]);const cells=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(r<2||c<2)cells.push(cell(r,c));const A=cell(2,2),as=s[(2+dir*2)%3];
+   addM(cells,A,[C(as,f[0]),C(as,f[1]),C(s[(as===s[0])?1:0],f[2]),C(s[(as===s[2])?1:2],f[2]),C(pick(SH.filter(x=>!s.includes(x))),f[2])],.72,'形は各段・各列に1回ずつ。塗りは列ごとに決まっている。')}
+  {const s=sub(SH.filter(x=>x!=='star'),3),f=sub(FL,3),up=R()<.5;const n=(r,c)=>up?1+r+c:5-r-c;const cell=(r,c)=>C(s[r],f[r],{n:n(r,c)});const cells=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(r<2||c<2)cells.push(cell(r,c));const A=cell(2,2),an=n(2,2);
+   addM(cells,A,[C(s[2],f[2],{n:up?4:2}),C(s[2],f[2],{n:3}),C(s[1],f[2],{n:an}),C(s[2],f[0],{n:an}),C(s[0],f[2],{n:an})],.7,'横の段は同じ形・同じ塗り。右へ行くほど1つ'+(up?'増え':'減り')+'、下の段ほどスタートも1つ'+(up?'多い':'少ない')+'。')}
+  {const st=pick([0,45,90,180,270]),step=pick([45,90,-90]),off=pick([45,90,180]);const ang=(r,c)=>(((st+r*off+c*step)%360)+360)%360;const cells=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(r<2||c<2)cells.push(C('arrow','f',{r:ang(r,c)}));const A=C('arrow','f',{r:ang(2,2)});
+   const ds=shuf([0,45,90,135,180,225,270,315].filter(x=>x!==ang(2,2))).slice(0,4).map(x=>C('arrow','f',{r:x}));ds.push(C('arrow','n',{r:ang(2,2)}));
+   addM(cells,A,ds,Math.abs(step)===45||off===45?.55:.62,'右へ行くごとに'+Math.abs(step)+'°'+(step>0?'時計回り':'反時計回り')+'に回転。下の段はスタートが'+off+'°ずれる。')}
+  {const s=sub(['sq','cir','hex'],3),stp=pick([1,-1]);const co=(r,c)=>CO[((r+c*stp)%4+4)%4];const cells=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(r<2||c<2)cells.push(D(s[r],co(r,c)));const ac=co(2,2);
+   addM(cells,D(s[2],ac),CO.filter(x=>x!==ac).map(x=>D(s[2],x)).concat([D(s[0],ac),D(s[1],ac)]),.6,'点は右へ行くごとに'+(stp>0?'時計回り':'反時計回り')+'に角を1つ移動。下の段はスタートが1つずれる。')}
+  {const rows=[];for(let r=0;r<3;r++){const p=sub(SEGS,ri(2,3));const a=p.slice(0,1+(p.length>2&&R()<.5?1:0)),b=p.filter(x=>!a.includes(x));rows.push([a,b,p])}
+   const cells=[];rows.forEach((rw,r)=>rw.forEach((x,c)=>{if(r<2||c<2)cells.push(SG(x))}));const U=rows[2][2];const extra=SEGS.filter(x=>!U.includes(x));
+   addM(cells,SEG(U),[SG(rows[2][0]),SG(rows[2][1]),SEG(U.concat([pick(extra)])),SG(U.slice(1)),SG(rows[1][2])],.66,'左の図と真ん中の図を重ねると右の図になる。')}
+  {let rows,ok=false;while(!ok){rows=[];ok=true;for(let r=0;r<3;r++){const a=sub(SEGS,3),b=sub(SEGS,3);const x=SEGS.filter(s=>a.includes(s)!==b.includes(s));const n=a.filter(s=>b.includes(s));if(!x.length||!n.length)ok=false;rows.push([a,b,x,n])}}
+   const cells=[];rows.forEach((rw,r)=>[rw[0],rw[1],rw[2]].forEach((x,c)=>{if(r<2||c<2)cells.push(SEG(x))}));const X=rows[2][2];const Un=SEGS.filter(s=>rows[2][0].includes(s)||rows[2][1].includes(s));
+   addM(cells,SEG(X),[SEG(Un),SEG(rows[2][3]),SEG(rows[2][0]),SEG(rows[2][1]),SG(X.concat(rows[2][3].slice(0,1)))],.5,'左と真ん中で共通する線は消え、片方だけにある線が残る。')}
+  {const rows=[];for(let r=0;r<3;r++){const a=sub(SEGS,ri(3,4)),b=sub(a,ri(1,2)),d=a.filter(x=>!b.includes(x));rows.push([a,b,d])}
+   const cells=[];rows.forEach((rw,r)=>rw.forEach((x,c)=>{if(r<2||c<2)cells.push(SEG(x))}));const Dd=rows[2][2];
+   addM(cells,SEG(Dd),[SEG(rows[2][0]),SEG(rows[2][1]),SEG(Dd.concat(rows[2][1].slice(0,1))),SG(Dd.slice(1)),SG(rows[1][2])],.52,'左の図から真ん中の図の線を取り除くと右の図になる。')}
+  {const s=sub(SH,3),z=R()<.5?ZS:ZS.slice().reverse(),dir=pick([1,2]);const cell=(r,c)=>C(s[(r+dir*c)%3],'n',{z:z[c]});const cells=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(r<2||c<2)cells.push(cell(r,c));const A=cell(2,2),as=s[(2+dir*2)%3];
+   addM(cells,A,[C(as,'n',{z:z[0]}),C(as,'n',{z:z[1]}),C(s.filter(x=>x!==as)[0],'n',{z:z[2]}),C(s.filter(x=>x!==as)[1],'n',{z:z[2]}),C(as,'f',{z:z[2]})],.72,'形は各段・各列に1回ずつ。大きさは列ごとに決まっている。')}
+}
+
+/* ---------- 図形系列（自動生成）3パターン×6問 ---------- */
+function addS(cells,ans,ds,p,exp){const o=[ans],ks=[ckey(ans)];ds.forEach(d=>{const k=ckey(d);if(o.length<5&&!ks.includes(k)){o.push(d);ks.push(k)}});if(o.length<5)return;out.push({id:nid('GS'),dom:'ser',p:p,a:1.1,q:QS,stim:{kind:'series',cells:cells},opts:o,exp:exp})}
+for(let i=0;i<6;i++){
+  {const st=pick([0,90,180,270]),step=pick([45,90,135,-90]),alt=R()<.5;const a=k=>(((st+k*step)%360)+360)%360,f=k=>alt?(k%2?'n':'f'):'f';
+   addS([0,1,2,3].map(k=>C('arrow',f(k),{r:a(k)})),C('arrow',f(4),{r:a(4)}),shuf([0,45,90,135,180,225,270,315].filter(x=>x!==a(4))).slice(0,3).map(x=>C('arrow',f(4),{r:x})).concat([C('arrow',alt?'n':'h',{r:a(4)})]),alt?.6:.7,'毎回'+Math.abs(step)+'°ずつ'+(step>0?'時計回り':'反時計回り')+'に回転'+(alt?'、塗りは黒・白が交互':'')+'。')}
+  {const s=sub(SH.filter(x=>x!=='star'),2),up=R()<.5,f=pick(FL);const n=k=>up?1+k:5-k;
+   addS([0,1,2,3].map(k=>C(s[k%2],f,{n:n(k)})),C(s[0],f,{n:n(4)}),[C(s[1],f,{n:n(4)}),C(s[0],f,{n:n(3)}),C(s[0],f==='f'?'n':'f',{n:n(4)}),C(pick(SH.filter(x=>!s.includes(x)&&x!=='star')),f,{n:n(4)})],.72,'形は2種類が交互、数は1つずつ'+(up?'増える':'減る')+'。')}
+  {const s=sub(['sq','cir','hex'],2),stp=pick([1,-1,2]);const co=k=>CO[((k*stp)%4+4)%4];
+   addS([0,1,2,3].map(k=>D(s[k%2],co(k))),D(s[0],co(4)),CO.filter(x=>x!==co(4)).map(x=>D(s[0],x)).concat([D(s[1],co(4))]),stp===2?.62:.6,'点は'+(stp===2?'対角の角へ交互に':((stp>0?'時計回り':'反時計回り')+'に1つずつ'))+'移動し、形は交互に入れ替わる。')}
+}
+
+/* ---------- 空間認識（自動生成） ---------- */
+function randPoly(n){let p=[[0,0]];while(p.length<n){const b=pick(p),d=pick([[1,0],[-1,0],[0,1],[0,-1]]),q=[b[0]+d[0],b[1]+d[1]];if(!p.some(x=>x[0]===q[0]&&x[1]===q[1]))p.push(q)}return p}
+for(let i=0;i<15;i++){let P,ok=false,mk=[];
+  while(!ok){P=randPoly(i<7?5:6);const m=mir(P);if(isRot(P,m))continue;mk=[];const seen=[];for(let k=0;k<4;k++){const r=rotN(m,k),kk=pk(r);if(!seen.includes(kk)){seen.push(kk);mk.push(r)}}ok=mk.length>=3}
+  const k=ri(1,3);out.push({id:nid('GR'),dom:'spa',p:i<7?.6:.52,q:QR,stim:{kind:'poly',poly:P},opts:[rotN(P,k)].concat(mk.slice(0,4)),exp:(k*90)+'°回転したものが正解。他は裏返した形（鏡写し）。'})}
+const FOLDS=[['L'],['R'],['T'],['B'],['L','T'],['R','B'],['T','R'],['B','L'],['L','L'],['T','T']];
+for(let i=0;i<15;i++){const fo=FOLDS[i%FOLDS.length].slice();const reg=foldSteps(fo).reg;const cells=[];for(let r=reg.r0;r<=reg.r1;r++)for(let c=reg.c0;c<=reg.c1;c++)cells.push([r,c]);
+  const np=fo.length>1&&R()<.4?2:1;const pu=shuf(cells).slice(0,np);const ans=unfold(fo,pu);const ak=hk(ans);
+  const flipH=h=>h.map(x=>[x[0],3-x[1]]),flipV=h=>h.map(x=>[3-x[0],x[1]]);
+  const cands=[pu,unfold(fo.slice(0,1),pu),flipH(ans),flipV(ans),ans.slice(1),ans.concat([[ (ans[0][0]+2)%4,(ans[0][1]+1)%4 ]]),ans.map(x=>[x[0],(x[1]+1)%4])];
+  const o=[ans],ks=[ak];cands.forEach(c=>{const k=hk(c);if(o.length<5&&c.length&&!ks.includes(k)&&new Set(c.map(x=>x.join())).size===c.length){o.push(c);ks.push(k)}});
+  if(o.length<4){i--;continue}
+  out.push({id:nid('GF'),dom:'spa',p:fo.length===1?.74:(np===2?.48:.58),q:QF,stim:{kind:'fold',folds:fo,punch:pu},opts:o,exp:'折り線を鏡にして、穴を広げる前の位置に順番に写していく。穴は全部で'+ans.length+'個。'})}
+for(let i=0;i<10;i++){const m=[[0,0,0],[0,0,0],[0,0,0]];m[0][0]=ri(2,3);
+  for(let y=0;y<3;y++)for(let x=0;x<3;x++){if(!x&&!y)continue;const lim=Math.min(y?m[y-1][x]:9,x?m[y][x-1]:9);m[y][x]=ri(Math.max(0,lim-2),lim)}
+  const sum=m.flat().reduce((a,b)=>a+b,0);if(sum<6||sum>18){i--;continue}const vis=m.flat().filter(x=>x>0).length;
+  out.push({id:nid('GB'),dom:'spa',p:sum<=10?.66:.54,q:QB,stim:{kind:'blocks',map:m},opts:numOpts(sum,[vis+sum-m[0][0],sum-1,sum+1,sum-2],v=>v+'個',1),exp:'奥の列から順に数える：'+m.map(r=>r.join('+')).join('、')+'。合計'+sum+'個。'})}
+return out;
+})();
+GEN.forEach(x=>RAW.push(Object.assign({extra:true},x)));
+
+/* ===== 大量追加：言葉・論理（手作業） ===== */
+const HANDX=[
+['ver',.82,'「足：靴」と同じ関係になるのは？\n「手：？」','手袋',['指','腕','指輪','握手'],'身につけて保護するものの関係。'],
+['ver',.7,'「ペン：インク」と同じ関係になるのは？\n「自動車：？」','ガソリン',['タイヤ','道路','運転手','ハンドル'],'動かすために消費するものの関係。'],
+['ver',.72,'「ページ：本」と同じ関係になるのは？\n「葉：？」','木',['枝','緑','紙','光'],'部分と全体の関係。'],
+['ver',.82,'「速い：遅い」と同じ関係になるのは？\n「浅い：？」','深い',['狭い','低い','浅瀬','広い'],'反対語の関係。'],
+['ver',.7,'「画家：筆」と同じ関係になるのは？\n「大工：？」','かんな',['家','木材','設計図','屋根'],'職業と、その人が使う道具の関係。'],
+['ver',.78,'「図書館：本」と同じ関係になるのは？\n「美術館：？」','絵画',['画家','入場券','建物','学芸員'],'施設と、そこに集めて展示・保管するものの関係。'],
+['ver',.55,'「小説：章」と同じ関係になるのは？\n「演劇：？」','幕',['舞台','役者','台本','観客'],'作品とそれを区切る単位の関係。'],
+['ver',.65,'「冬眠：クマ」と同じ関係になるのは？\n「渡り：？」','ツバメ',['カエル','ヘビ','カメ','リス'],'季節に合わせた行動と、それをする動物の関係。'],
+['ver',.65,'「温度：温度計」と同じ関係になるのは？\n「湿度：？」','湿度計',['雨量計','気圧計','体温計','風速計'],'測るものと、それを測る道具の関係。'],
+['ver',.55,'「賛成：反対」と同じ関係になるのは？\n「需要：？」','供給',['消費','生産','要求','販売'],'対になる言葉の関係。'],
+['ver',.5,'「鍵：錠前」と同じ関係になるのは？\n「ボルト：？」','ナット',['ドライバー','釘','スパナ','ドア'],'2つで1組になって働くものの関係。'],
+['ver',.6,'「月：地球」と同じ関係になるのは？\n「地球：？」','太陽',['月','宇宙','銀河','火星'],'周りを回るものと、回られる中心の関係。'],
+['ver',.45,'「メートル：長さ」と同じ関係になるのは？\n「ヘルツ：？」','周波数',['電力','重さ','温度','圧力'],'単位と、それが表す量の関係。'],
+['ver',.5,'「抽象：具体」と同じ関係になるのは？\n「主観：？」','客観',['感情','意見','具象','判断'],'対になる言葉の関係。'],
+['ver',.55,'仲間外れはどれ？','キャベツ',['トマト','なす','ピーマン','きゅうり'],'キャベツだけ葉を食べる野菜。他は実を食べる。'],
+['ver',.75,'仲間外れはどれ？','月',['水星','金星','火星','木星'],'月だけ惑星ではなく衛星。'],
+['ver',.8,'仲間外れはどれ？','コウモリ',['ペンギン','ダチョウ','ニワトリ','スズメ'],'コウモリだけ鳥ではない（哺乳類）。飛ばない鳥もいる。'],
+['ver',.6,'仲間外れはどれ？','サメ',['イルカ','クジラ','アザラシ','ラッコ'],'サメだけ哺乳類ではない（魚類）。'],
+['ver',.6,'仲間外れはどれ？','ダイヤモンド',['銀','銅','鉄','水銀'],'ダイヤモンドだけ金属ではない（炭素）。'],
+['ver',.7,'仲間外れはどれ？','ピアノ',['ソプラノ','アルト','テノール','バス'],'ピアノ以外は声の高さ（声部）の名前。'],
+['ver',.65,'仲間外れはどれ？','倍',['百','千','万','億'],'倍以外は数の位の名前。'],
+['ver',.7,'仲間外れはどれ？','さっさと',['ゆっくり','のんびり','だらだら','のろのろ'],'さっさとだけ「速い」様子。'],
+['ver',.82,'仲間外れはどれ？','サングラス',['傘','レインコート','長靴','雨合羽'],'サングラスだけ雨の日の道具ではない。'],
+['ver',.65,'仲間外れはどれ？','短気',['温厚','柔和','穏やか','温和'],'短気だけ「気が短い」。他は穏やかな性格を表す。'],
+['ver',.6,'仲間外れはどれ？','ベートーヴェン',['エジソン','ベル','ライト兄弟','ノーベル'],'ベートーヴェンだけ発明家ではない（作曲家）。'],
+['ver',.6,'仲間外れはどれ？','吾輩は猫である',['源氏物語','枕草子','徒然草','方丈記'],'吾輩は猫であるだけ明治時代の作品。他は平安・鎌倉時代の古典。'],
+['ver',.55,'仲間外れはどれ？','長方形',['正三角形','正方形','正五角形','正六角形'],'長方形だけ正多角形ではない（辺の長さが全部同じではない）。'],
+['ver',.75,'「矛盾」の意味に最も近いのは？','つじつまが合わないこと',['二つを比べること','強い者が勝つこと','堅く守ること','争いをやめること'],'何でも突き通す矛と、何も通さない盾を同時に売った商人の故事から。'],
+['ver',.75,'「五十歩百歩」の意味に最も近いのは？','大きな違いはないこと',['少しずつ進むこと','非常に遠いこと','数が多いこと','努力が足りないこと'],'50歩逃げた者が100歩逃げた者を笑ったが、逃げたことに変わりはないという故事から。'],
+['ver',.6,'「背水の陣」の意味に最も近いのは？','退路を断って必死に取り組むこと',['水辺で休むこと','敵に背を向けること','有利な場所に陣取ること','逃げ道を確保すること'],'川を背にして逃げられない陣を敷いた故事から。'],
+['ver',.6,'「漁夫の利」の意味に最も近いのは？','争いの隙に第三者が利益を得ること',['こつこつ働いて得た利益','魚をたくさん釣ること','利益を独り占めすること','利益を山分けすること'],'鳥と貝が争っている間に漁師が両方を捕まえた故事から。'],
+['ver',.6,'「推敲（すいこう）」の意味に最も近いのは？','文章を何度も練り直すこと',['推測すること','目上の人を敬うこと','強く勧めること','こっそり調べること'],'「推す」か「敲く」かで詩人が悩んだ故事から。'],
+['ver',.35,'「やおら立ち上がった」の「やおら」の本来の意味は？','ゆっくりと',['急に','こっそり','しぶしぶ','勢いよく'],'本来は「ゆっくりと」。文化庁の調査では「急に」と誤解する人が多い。'],
+['ver',.3,'「破天荒（はてんこう）」の本来の意味は？','誰も成し得なかったことを初めて行うこと',['豪快で大胆な様子','乱暴で手に負えない様子','常識はずれで型破りなこと','天気が荒れること'],'本来は「前人未到のことをする」。「豪快・大胆」は誤解として広まった意味（文化庁調査）。'],
+['ver',.35,'「姑息（こそく）な手段」の「姑息」の本来の意味は？','一時しのぎ',['ひきょう','けち','ずるがしこい','臆病'],'本来は「その場しのぎ」。「ひきょう」の意味で使う人が多い（文化庁調査）。'],
+['ver',.3,'「憮然（ぶぜん）とした表情」の本来の意味は？','失望してぼんやりしている様子',['腹を立てている様子','得意げな様子','落ち着き払った様子','退屈そうな様子'],'本来は「失望・落胆してぼんやりする様子」。「腹を立てている」は誤解（文化庁調査）。'],
+['ver',.35,'「あの店は敷居が高い」の本来の意味は？','不義理などがあって行きにくい',['高級で入りにくい','難しくて理解しにくい','入口の段差が大きい','緊張して落ち着かない'],'本来は「不義理や面目ないことがあって行きにくい」。「高級すぎる」は誤解（文化庁調査）。'],
+['ver',.3,'「流れに棹（さお）さす」の本来の意味は？','傾向に乗って勢いを増す',['流れに逆らう','物事の邪魔をする','流れを止める','途中でやめる'],'本来は「流れに乗って進む」。逆の意味に誤解されやすい（文化庁調査）。'],
+['ver',.45,'「気が置けない友人」の本来の意味は？','遠慮しなくてよい',['油断できない','気をつかう','信用できない','落ち着かない'],'本来は「気をつかわなくてよい」。逆の意味に誤解されやすい（文化庁調査）。'],
+['ver',.45,'「そろそろ潮時だ」の「潮時」の本来の意味は？','ちょうどよい時期',['やめるべき時','物事の終わり際','危ない時','満潮の時刻'],'本来は「何かをするのにちょうどよい時」。「やめ時」に限らない（文化庁調査）。'],
+['ver',.45,'「他山の石」の意味に最も近いのは？','他人の誤りも自分を磨く参考になる',['他人の成功をまねる','遠くにある宝物','役に立たないもの','見習うべき立派な手本'],'よその山の粗い石も自分の宝石を磨くのに使える、という意味から。「立派な手本」は誤用。'],
+['ver',.6,'「天王山」の意味に最も近いのは？','勝負の分かれ目',['一番高い場所','最後の手段','強い味方','大きな失敗'],'山崎の戦いで天王山を取った側が勝ったことから。'],
+['ver',.6,'「釈迦に説法」の意味に最も近いのは？','よく知っている人に教えようとする愚かさ',['ありがたい話','説得の難しさ','教えを守る大切さ','話が長いこと'],'お釈迦様に仏の教えを説くような無駄なこと。'],
+['ver',.6,'「立て板に水」の意味に最も近いのは？','すらすらとよどみなく話すこと',['無駄なことをすること','すぐに忘れること','準備がよいこと','急に止まること'],'立てた板に水を流すように、つかえずに話す様子。'],
+['log',.55,'「すべての医者は大学を出ている」「Aさんは大学を出ている」\nこのとき、確実に言えるのは？','Aさんが医者かどうかは分からない',['Aさんは医者である','Aさんは医者ではない','大学を出た人はみな医者だ','医者でない人は大学を出ていない'],'大学を出た人の中には医者以外の人もいる。逆は必ずしも正しくない。'],
+['log',.65,'「ある学生は運動部員である」「すべての運動部員は朝練に出る」\nこのとき、確実に言えるのは？','ある学生は朝練に出る',['すべての学生は朝練に出る','朝練に出る人はみな学生だ','運動部員はみな学生だ','学生は朝練に出ない'],'運動部員である学生は必ず朝練に出る。'],
+['log',.55,'「この店が開いていれば、看板の明かりがついている」\n「今、看板の明かりがついていない」\nこのとき、確実に言えるのは？','店は開いていない',['店は開いている','明かりが故障している','明日は開く','どれも確実には言えない'],'「AならB」で「Bでない」なら「Aでない」（対偶）。'],
+['log',.5,'「すべての猫は動物である」「ポチは猫ではない」\nこのとき、確実に言えるのは？','ポチが動物かどうかは分からない',['ポチは動物ではない','ポチは動物である','ポチは犬である','動物はすべて猫である'],'猫でなくても動物であることはある。'],
+['log',.8,'「当番はAかBのどちらか1人」「Aは当番ではない」\nこのとき、確実に言えるのは？','Bが当番である',['Aが当番である','2人とも当番だ','当番はいない','判断できない'],'2人のうちAではないので、B。'],
+['log',.5,'「どの魚も肺で呼吸しない」「ハイギョは肺で呼吸する」\nこの2つが正しいとすると、確実に言えるのは？','ハイギョは魚ではない',['ハイギョは魚である','魚の一部は肺で呼吸する','ハイギョはえらでも呼吸する','判断できない'],'前提だけから考えると、肺で呼吸するものは魚ではない。（現実の知識ではなく、条件から論理的に導くのがポイント）']
+];
+HANDX.forEach((h,i)=>RAW.push({extra:true,id:(h[0]==='ver'?'HV':'HL')+String(i+1).padStart(3,'0'),dom:h[0],p:h[1],q:h[2],opts:[h[3]].concat(h[4]),exp:h[5]}));
 const QUICK_IDS=['M01','M04','M07','M09','S03','R02','N01','N02','N04','V02','V07','V09','V10','A02','A04','A07','L02','L04','W02','W05'];
 
 function build(it){
