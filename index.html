@@ -28,10 +28,10 @@
   --accent:#3a4dd6; --accent-ink:#ffffff; --accent-soft:#e3e7fb; --glow:#c7891a; --ok:#1d8f5a; --bad:#cf3f3f;
   --font-body:'Zen Kaku Gothic New','Hiragino Sans','Noto Sans JP',system-ui,sans-serif;
   --font-mono:'Chivo Mono','SFMono-Regular',Consolas,monospace;
-  --radius:14px; --shadow:0 4px 18px rgba(20,26,38,.07);
+  --cube-top:#f4f6fb;--cube-left:#9aa6c4;--cube-right:#5d6a8c;--cube-edge:#141a26;--radius:14px; --shadow:0 4px 18px rgba(20,26,38,.07);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f131b;--surface:#171c27;--surface-2:#202736;--ink:#e9edf5;--ink-2:#99a3b5;--line:#2a3344;--accent:#8292ff;--accent-ink:#0f131b;--accent-soft:#262d4d;--glow:#e6a93c;--ok:#3fbf85;--bad:#ef6464;--shadow:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0f131b;--surface:#171c27;--surface-2:#202736;--ink:#e9edf5;--ink-2:#99a3b5;--line:#2a3344;--accent:#8292ff;--accent-ink:#0f131b;--accent-soft:#262d4d;--glow:#e6a93c;--ok:#3fbf85;--bad:#ef6464;--shadow:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cube-top:#e9edf5;--cube-left:#8a97b8;--cube-right:#4f5b7a;--cube-edge:#0f131b;--bg:#0f131b;--surface:#171c27;--surface-2:#202736;--ink:#e9edf5;--ink-2:#99a3b5;--line:#2a3344;--accent:#8292ff;--accent-ink:#0f131b;--accent-soft:#262d4d;--glow:#e6a93c;--ok:#3fbf85;--bad:#ef6464;--shadow:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{--cube-top:#e9edf5;--cube-left:#8a97b8;--cube-right:#4f5b7a;--cube-edge:#0f131b;--bg:#0f131b;--surface:#171c27;--surface-2:#202736;--ink:#e9edf5;--ink-2:#99a3b5;--line:#2a3344;--accent:#8292ff;--accent-ink:#0f131b;--accent-soft:#262d4d;--glow:#e6a93c;--ok:#3fbf85;--bad:#ef6464;--shadow:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100%}
 button{font-family:inherit}
@@ -1165,9 +1165,9 @@ function blocksSVG(map){
     const top=[Pt(x,y,z+1),Pt(x+1,y,z+1),Pt(x+1,y+1,z+1),Pt(x,y+1,z+1)];
     const right=[Pt(x+1,y,z),Pt(x+1,y+1,z),Pt(x+1,y+1,z+1),Pt(x+1,y,z+1)];
     const left=[Pt(x,y+1,z),Pt(x+1,y+1,z),Pt(x+1,y+1,z+1),Pt(x,y+1,z+1)];
-    [[top,.14],[left,.52],[right,.32]].forEach(f=>{faces.push(f);f[0].forEach(p=>{minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);miny=Math.min(miny,p[1]);maxy=Math.max(maxy,p[1])})})});
+    [[top,'var(--cube-top)'],[left,'var(--cube-left)'],[right,'var(--cube-right)']].forEach(f=>{faces.push(f);f[0].forEach(p=>{minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);miny=Math.min(miny,p[1]);maxy=Math.max(maxy,p[1])})})});
   const m=6;
-  return'<svg class="blocks" viewBox="'+(minx-m).toFixed(1)+' '+(miny-m).toFixed(1)+' '+(maxx-minx+2*m).toFixed(1)+' '+(maxy-miny+2*m).toFixed(1)+'">'+faces.map(f=>'<polygon points="'+f[0].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="currentColor" fill-opacity="'+f[1]+'" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>').join('')+'</svg>';
+  return'<svg class="blocks" viewBox="'+(minx-m).toFixed(1)+' '+(miny-m).toFixed(1)+' '+(maxx-minx+2*m).toFixed(1)+' '+(maxy-miny+2*m).toFixed(1)+'">'+faces.map(f=>'<polygon points="'+f[0].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="'+f[1]+'" stroke="var(--cube-edge)" stroke-width="1.6" stroke-linejoin="round"/>').join('')+'</svg>';
 }
 function stimHTML(st){
   if(!st)return'';
